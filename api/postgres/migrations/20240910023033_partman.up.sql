@@ -1,0 +1,9 @@
+CREATE SCHEMA IF NOT EXISTS partman;
+CREATE EXTENSION IF NOT EXISTS "pg_partman" SCHEMA partman;
+
+CREATE ROLE partman_user WITH LOGIN;
+GRANT ALL ON SCHEMA partman TO partman_user;
+GRANT ALL ON ALL TABLES IN SCHEMA partman TO partman_user;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA partman TO partman_user;
+GRANT EXECUTE ON ALL PROCEDURES IN SCHEMA partman TO partman_user;
+GRANT ALL ON SCHEMA public TO partman_user;

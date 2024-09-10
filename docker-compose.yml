@@ -2,7 +2,9 @@ name: agent.net
 
 services:
   postgres:
-    image: postgres:alpine
+    build:
+      context: .
+      dockerfile: ./api/postgres/docker/Dockerfile
     ports:
       - 5432:5432
     environment:
@@ -11,7 +13,9 @@ services:
       POSTGRES_PASSWORD: admin
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    build:
+      context: .
+      dockerfile: ./api/amqp/docker/Dockerfile
     ports:
       - 5672:5672
       - 15672:15672
@@ -21,6 +25,10 @@ services:
       RABBITMQ_MANAGEMENT_PORT: 15672
       RABBITMQ_MANAGEMENT_USER: admin
       RABBITMQ_MANAGEMENT_PASS: admin
+    volumes:
+      - type: bind
+        source: ./api/amqp/docker/
+        target: /etc/rabbitmq/
 
 networks:
   default:
