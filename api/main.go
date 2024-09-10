@@ -11,6 +11,7 @@ import (
 	"github.com/aacebo/agent.net/api/common"
 	"github.com/aacebo/agent.net/api/postgres"
 	"github.com/aacebo/agent.net/api/routes"
+	"github.com/aacebo/agent.net/api/schemas"
 	"github.com/aacebo/agent.net/api/sockets"
 	"github.com/aacebo/agent.net/api/utils"
 	"github.com/go-chi/chi/v5"
@@ -31,9 +32,16 @@ func main() {
 	amqp := amqp.New()
 	defer amqp.Close()
 
+	schemas, err := schemas.Load()
+
+	if err != nil {
+		panic(err)
+	}
+
 	ctx := common.Context{
 		"amqp":    amqp,
 		"pg":      pg,
+		"schemas": schemas,
 		"sockets": sockets.New(),
 	}
 
