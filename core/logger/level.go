@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/aacebo/agent.net/api/utils"
+	"github.com/aacebo/agent.net/core/utils"
 )
 
 type Level string

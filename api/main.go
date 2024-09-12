@@ -13,7 +13,7 @@ import (
 	"github.com/aacebo/agent.net/api/routes"
 	"github.com/aacebo/agent.net/api/schemas"
 	"github.com/aacebo/agent.net/api/sockets"
-	"github.com/aacebo/agent.net/api/utils"
+	"github.com/aacebo/agent.net/core/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"

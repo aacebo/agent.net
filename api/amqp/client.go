@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/aacebo/agent.net/api/logger"
-	"github.com/aacebo/agent.net/api/utils"
+	"github.com/aacebo/agent.net/core/logger"
+	"github.com/aacebo/agent.net/core/utils"
 
 	"github.com/rabbitmq/amqp091-go"
 )

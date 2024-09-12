@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/aacebo/agent.net/api/logger"
-	"github.com/aacebo/agent.net/api/utils"
+	"github.com/aacebo/agent.net/core/logger"
+	"github.com/aacebo/agent.net/core/utils"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
