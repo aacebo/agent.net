@@ -3,6 +3,7 @@ module github.com/aacebo/agent.net/api
 go 1.23.1
 
 require (
+	github.com/aacebo/agent.net/core v0.0.0-20240912173651-69b9646ad2e8
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/cors v1.2.1
 	github.com/go-chi/httprate v0.9.0
