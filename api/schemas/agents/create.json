@@ -4,12 +4,24 @@
   "properties": {
     "description": {
       "type": "string",
-      "description": "the agents description"
+      "description": "the agents description",
+      "minLength": 10,
+      "maxLength": 1000
     },
     "instructions": {
       "type": "string",
       "description": "the agents directive"
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "the model name or url to use"
+        }
+      },
+      "required": ["model"]
     }
   },
-  "required": ["description"]
+  "required": ["description", "settings"]
 }
