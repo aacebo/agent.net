@@ -8,10 +8,10 @@ import (
 )
 
 type AgentSettings struct {
-	Model            string   `json:"model"`             // https://platform.openai.com/docs/api-reference/chat/create#chat-create-model
-	FrequencyPenalty *int     `json:"frequency_penalty"` // https://platform.openai.com/docs/api-reference/chat/create#chat-create-frequency_penalty
-	LogitBias        Map[any] `json:"logit_bias"`        // https://platform.openai.com/docs/api-reference/chat/create#chat-create-logit_bias
-	LogProbs         *bool    `json:"logprobs"`          // https://platform.openai.com/docs/api-reference/chat/create#chat-create-logprobs
+	Model            string   `json:"model"`                       // https://platform.openai.com/docs/api-reference/chat/create#chat-create-model
+	FrequencyPenalty *int     `json:"frequency_penalty,omitempty"` // https://platform.openai.com/docs/api-reference/chat/create#chat-create-frequency_penalty
+	LogitBias        Map[any] `json:"logit_bias,omitempty"`        // https://platform.openai.com/docs/api-reference/chat/create#chat-create-logit_bias
+	LogProbs         *bool    `json:"logprobs,omitempty"`          // https://platform.openai.com/docs/api-reference/chat/create#chat-create-logprobs
 }
 
 func (self AgentSettings) Value() (driver.Value, error) {

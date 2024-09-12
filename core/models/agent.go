@@ -9,9 +9,9 @@ import (
 
 type Agent struct {
 	ID           string        `json:"id"`
-	ParentID     *string       `json:"parent_id"`
+	ParentID     *string       `json:"parent_id,omitempty"`
 	Description  string        `json:"description"`
-	Instructions *string       `json:"instructions"`
+	Instructions *string       `json:"instructions,omitempty"`
 	ClientID     string        `json:"-"`
 	ClientSecret Secret        `json:"-"`
 	Settings     AgentSettings `json:"settings"`

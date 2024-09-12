@@ -13,6 +13,7 @@ import (
 	"github.com/aacebo/agent.net/api/routes"
 	"github.com/aacebo/agent.net/api/schemas"
 	"github.com/aacebo/agent.net/api/sockets"
+	"github.com/aacebo/agent.net/core/repos"
 	"github.com/aacebo/agent.net/core/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -39,10 +40,11 @@ func main() {
 	}
 
 	ctx := common.Context{
-		"amqp":    amqp,
-		"pg":      pg,
-		"schemas": schemas,
-		"sockets": sockets.New(),
+		"amqp":         amqp,
+		"pg":           pg,
+		"schemas":      schemas,
+		"sockets":      sockets.New(),
+		"repos.agents": repos.NewAgent(pg),
 	}
 
 	r := chi.NewRouter()
