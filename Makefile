@@ -1,11 +1,3 @@
-clean:
-	rm -rf ./bin
-
-build:
-	go build ./...
-
-clean_build: clean build
-
 fmt:
 	gofmt -w ./
 
@@ -14,7 +6,7 @@ test:
 	go test ./... -cover
 
 run:
-	go run ./
+	go run ./api
 
 migrate.up:
 	migrate -source file://postgres/migrations -database "$(POSTGRES_CONNECTION_STRING)" up

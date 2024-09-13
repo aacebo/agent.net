@@ -6,9 +6,11 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/utils"
+	"github.com/google/uuid"
 
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -76,7 +78,7 @@ func (self Client) Closed() bool {
 	return false
 }
 
-func (self Client) Publish(exchange string, queue string, body any) {
+func (self Client) Publish(exchange string, queue string, body any) Event {
 	key := fmt.Sprintf("%s.%s", exchange, queue)
 
 	if self.Closed() {
@@ -95,9 +97,15 @@ func (self Client) Publish(exchange string, queue string, body any) {
 		self.queues[key] = *q
 	}
 
+	event := Event{
+		ID:        uuid.NewString(),
+		Body:      body,
+		CreatedAt: time.Now(),
+	}
+
 	buf := bytes.Buffer{}
 	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(body)
+	err := enc.Encode(event)
 
 	if err != nil {
 		self.log.Error(err.Error())
@@ -118,6 +126,8 @@ func (self Client) Publish(exchange string, queue string, body any) {
 	if err != nil {
 		self.log.Error(err.Error())
 	}
+
+	return event
 }
 
 func (self *Client) Consume(exchange string, queue string, handler func(amqp091.Delivery)) {

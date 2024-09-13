@@ -4,7 +4,7 @@ services:
   postgres:
     build:
       context: .
-      dockerfile: ./api/postgres/docker/Dockerfile
+      dockerfile: ./postgres/docker/Dockerfile
     ports:
       - 5432:5432
     environment:
@@ -15,7 +15,7 @@ services:
   rabbitmq:
     build:
       context: .
-      dockerfile: ./api/amqp/docker/Dockerfile
+      dockerfile: ./amqp/docker/Dockerfile
     ports:
       - 5672:5672
       - 15672:15672
@@ -27,7 +27,7 @@ services:
       RABBITMQ_MANAGEMENT_PASS: admin
     volumes:
       - type: bind
-        source: ./api/amqp/docker/
+        source: ./amqp/docker/
         target: /etc/rabbitmq/
 
 networks:

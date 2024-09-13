@@ -3,7 +3,7 @@ package agents
 import (
 	"net/http"
 
-	"github.com/aacebo/agent.net/api/amqp"
+	"github.com/aacebo/agent.net/amqp"
 	"github.com/aacebo/agent.net/api/common"
 	"github.com/aacebo/agent.net/api/sockets"
 	"github.com/google/uuid"

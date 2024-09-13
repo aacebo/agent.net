@@ -3,6 +3,7 @@ package agents
 import (
 	"net/http"
 
+	"github.com/aacebo/agent.net/amqp"
 	"github.com/aacebo/agent.net/api/common"
 	"github.com/aacebo/agent.net/core/models"
 	"github.com/aacebo/agent.net/core/repos"
@@ -16,6 +17,7 @@ type CreateBody struct {
 }
 
 func Create(ctx common.Context) http.HandlerFunc {
+	amqp := ctx.Value("amqp").(*amqp.Client)
 	agents := ctx.Value("repos.agents").(repos.IAgentRepository)
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +28,7 @@ func Create(ctx common.Context) http.HandlerFunc {
 		agent.Instructions = body.Instructions
 		agent.Settings = body.Settings
 		agent = agents.Create(agent)
+		amqp.Publish("agents", "create", agent)
 
 		render.Status(r, http.StatusCreated)
 		render.JSON(w, r, agent)

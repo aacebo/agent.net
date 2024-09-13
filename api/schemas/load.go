@@ -13,7 +13,7 @@ func Load() (Schemas, error) {
 	schemas := Schemas{}
 	errs := []error{}
 	compiler := jsonschema.NewCompiler()
-	err := filepath.Walk("./schemas", func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk("./api/schemas", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
