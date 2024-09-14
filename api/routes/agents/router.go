@@ -19,4 +19,12 @@ func New(r chi.Router, ctx context.Context) {
 		"/agents",
 		Create(ctx),
 	)
+
+	r.With(
+		middleware.WithAgent(ctx),
+		middleware.WithBody[CreateBody](ctx, "/agents/create"),
+	).Post(
+		"/agents/{agent_id}/agents",
+		Create(ctx),
+	)
 }

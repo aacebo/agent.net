@@ -21,9 +21,15 @@ func Create(ctx context.Context) http.HandlerFunc {
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		parent, isChild := r.Context().Value("agent").(models.Agent)
 		body := r.Context().Value("body").(CreateBody)
 
 		agent := models.NewAgent()
+
+		if isChild {
+			agent.ParentID = &parent.ID
+		}
+
 		agent.Description = body.Description
 		agent.Instructions = body.Instructions
 		agent.Settings = body.Settings
