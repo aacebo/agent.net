@@ -14,6 +14,11 @@ type AgentSettings struct {
 	LogProbs         *bool    `json:"logprobs,omitempty"`          // https://platform.openai.com/docs/api-reference/chat/create#chat-create-logprobs
 }
 
+func (self AgentSettings) String() string {
+	b, _ := json.Marshal(self)
+	return string(b)
+}
+
 func (self AgentSettings) Value() (driver.Value, error) {
 	value, err := json.Marshal(self)
 

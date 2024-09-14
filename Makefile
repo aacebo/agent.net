@@ -5,8 +5,11 @@ test:
 	go clean -testcache
 	go test ./... -cover
 
-run:
+api.run:
 	go run ./api
+
+worker.run:
+	go run ./worker
 
 migrate.up:
 	migrate -source file://postgres/migrations -database "$(POSTGRES_CONNECTION_STRING)" up

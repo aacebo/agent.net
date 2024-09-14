@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/aacebo/agent.net/core/utils"
@@ -26,4 +27,9 @@ func NewAgent() Agent {
 		ClientSecret: Secret(utils.RandString(32)),
 		Settings:     AgentSettings{},
 	}
+}
+
+func (self Agent) String() string {
+	b, _ := json.Marshal(self)
+	return string(b)
 }

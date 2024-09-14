@@ -78,7 +78,7 @@ func (self Client) Closed() bool {
 	return false
 }
 
-func (self Client) Publish(exchange string, queue string, body any) Event {
+func (self Client) Publish(exchange string, queue string, body any) Event[any] {
 	key := fmt.Sprintf("%s.%s", exchange, queue)
 
 	if self.Closed() {
@@ -97,7 +97,7 @@ func (self Client) Publish(exchange string, queue string, body any) Event {
 		self.queues[key] = *q
 	}
 
-	event := Event{
+	event := Event[any]{
 		ID:        uuid.NewString(),
 		Body:      body,
 		CreatedAt: time.Now(),

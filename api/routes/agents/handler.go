@@ -1,10 +1,10 @@
 package agents
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/aacebo/agent.net/amqp"
-	"github.com/aacebo/agent.net/api/common"
 	"github.com/aacebo/agent.net/api/sockets"
 	"github.com/google/uuid"
 
@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func Handler(ctx common.Context) http.HandlerFunc {
+func Handler(ctx context.Context) http.HandlerFunc {
 	amqp := ctx.Value("amqp").(*amqp.Client)
 	socks := ctx.Value("sockets").(*sockets.Client)
 	upgrader := websocket.Upgrader{

@@ -9,6 +9,11 @@ import (
 
 type Map[T any] map[string]T
 
+func (self Map[T]) String() string {
+	b, _ := json.Marshal(self)
+	return string(b)
+}
+
 func (self Map[T]) Value() (driver.Value, error) {
 	value, err := json.Marshal(self)
 

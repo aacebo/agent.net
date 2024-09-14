@@ -1,12 +1,13 @@
 package agents
 
 import (
-	"github.com/aacebo/agent.net/api/common"
+	"context"
+
 	"github.com/aacebo/agent.net/api/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
-func New(r chi.Router, ctx common.Context) {
+func New(r chi.Router, ctx context.Context) {
 	r.HandleFunc(
 		"/sockets",
 		Handler(ctx),

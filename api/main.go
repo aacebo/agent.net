@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/aacebo/agent.net/amqp"
-	"github.com/aacebo/agent.net/api/common"
 	"github.com/aacebo/agent.net/api/routes"
 	"github.com/aacebo/agent.net/api/schemas"
 	"github.com/aacebo/agent.net/api/sockets"
+	"github.com/aacebo/agent.net/core"
 	"github.com/aacebo/agent.net/core/repos"
 	"github.com/aacebo/agent.net/core/utils"
 	"github.com/aacebo/agent.net/postgres"
@@ -39,12 +39,12 @@ func main() {
 		panic(err)
 	}
 
-	ctx := common.Context{
+	ctx := core.Context{
 		"amqp":         amqp,
 		"pg":           pg,
 		"schemas":      schemas,
 		"sockets":      sockets.New(),
-		"repos.agents": repos.NewAgent(pg),
+		"repos.agents": repos.Agents(pg),
 	}
 
 	r := chi.NewRouter()

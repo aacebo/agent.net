@@ -1,10 +1,10 @@
 package agents
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/aacebo/agent.net/amqp"
-	"github.com/aacebo/agent.net/api/common"
 	"github.com/aacebo/agent.net/core/models"
 	"github.com/aacebo/agent.net/core/repos"
 	"github.com/go-chi/render"
@@ -16,9 +16,9 @@ type CreateBody struct {
 	Settings     models.AgentSettings `json:"settings"`
 }
 
-func Create(ctx common.Context) http.HandlerFunc {
+func Create(ctx context.Context) http.HandlerFunc {
 	amqp := ctx.Value("amqp").(*amqp.Client)
-	agents := ctx.Value("repos.agents").(repos.IAgentRepository)
+	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		body := r.Context().Value("body").(CreateBody)

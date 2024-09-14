@@ -9,7 +9,7 @@ import (
 	"github.com/aacebo/agent.net/core/models"
 )
 
-type IAgentRepository interface {
+type IAgentsRepository interface {
 	GetByID(id string) (models.Agent, bool)
 
 	Create(value models.Agent) models.Agent
@@ -17,19 +17,19 @@ type IAgentRepository interface {
 	Delete(id string)
 }
 
-type AgentRepository struct {
+type AgentsRepository struct {
 	pg  *sql.DB
 	log *slog.Logger
 }
 
-func NewAgent(pg *sql.DB) AgentRepository {
-	return AgentRepository{
+func Agents(pg *sql.DB) AgentsRepository {
+	return AgentsRepository{
 		pg:  pg,
 		log: logger.New("agent.net/repos/agents"),
 	}
 }
 
-func (self AgentRepository) GetByID(id string) (models.Agent, bool) {
+func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 	v := models.Agent{}
 	err := self.pg.QueryRow(
 		`
@@ -70,7 +70,7 @@ func (self AgentRepository) GetByID(id string) (models.Agent, bool) {
 	return v, true
 }
 
-func (self AgentRepository) Create(value models.Agent) models.Agent {
+func (self AgentsRepository) Create(value models.Agent) models.Agent {
 	now := time.Now()
 	value.CreatedAt = now
 	value.UpdatedAt = now
@@ -116,7 +116,7 @@ func (self AgentRepository) Create(value models.Agent) models.Agent {
 	return value
 }
 
-func (self AgentRepository) Update(value models.Agent) models.Agent {
+func (self AgentsRepository) Update(value models.Agent) models.Agent {
 	now := time.Now()
 	value.UpdatedAt = now
 	_, err := self.pg.Exec(
@@ -142,7 +142,7 @@ func (self AgentRepository) Update(value models.Agent) models.Agent {
 	return value
 }
 
-func (self AgentRepository) Delete(id string) {
+func (self AgentsRepository) Delete(id string) {
 	_, err := self.pg.Exec(
 		`
 			DELETE FROM agents

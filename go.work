@@ -4,3 +4,4 @@ use ./amqp
 use ./api
 use ./core
 use ./postgres
+use ./worker
