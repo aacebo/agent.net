@@ -13,6 +13,7 @@ type Agent struct {
 	ParentID     *string       `json:"parent_id,omitempty"`
 	Description  string        `json:"description"`
 	Instructions *string       `json:"instructions,omitempty"`
+	URL          *string       `json:"url,omitempty"`
 	ClientID     string        `json:"-"`
 	ClientSecret Secret        `json:"-"`
 	Settings     AgentSettings `json:"settings"`

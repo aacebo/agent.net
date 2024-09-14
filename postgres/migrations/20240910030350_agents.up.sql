@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS agents (
 	parent_id		UUID			REFERENCES agents(id) ON DELETE CASCADE,
 	description		TEXT			NOT NULL,
 	instructions	TEXT,
+	url				TEXT,
 	client_id		TEXT			NOT NULL,
 	client_secret	TEXT			NOT NULL,
 	settings		JSONB			NOT NULL,

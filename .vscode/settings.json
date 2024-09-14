@@ -1,0 +1,12 @@
+{
+  "rest-client.enableTelemetry": false,
+  "rest-client.defaultHeaders": {
+    "User-Agent": "vscode-restclient",
+    "Content-Type": "application/json"
+  },
+  "rest-client.environmentVariables": {
+    "local": {
+      "base_url": "http://localhost:3000"
+    }
+  }
+}

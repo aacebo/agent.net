@@ -38,6 +38,7 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 				parent_id,
 				description,
 				instructions,
+				url,
 				client_id,
 				client_secret,
 				settings,
@@ -52,6 +53,7 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 		&v.ParentID,
 		&v.Description,
 		&v.Instructions,
+		&v.URL,
 		&v.ClientID,
 		&v.ClientSecret,
 		&v.Settings,
@@ -81,6 +83,7 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 				parent_id,
 				description,
 				instructions,
+				url,
 				client_id,
 				client_secret,
 				settings,
@@ -95,13 +98,15 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 				$6,
 				$7,
 				$8,
-				$9
+				$9,
+				$10
 			)
 		`,
 		value.ID,
 		value.ParentID,
 		value.Description,
 		value.Instructions,
+		value.URL,
 		value.ClientID,
 		value.ClientSecret,
 		value.Settings,
@@ -124,13 +129,15 @@ func (self AgentsRepository) Update(value models.Agent) models.Agent {
 			UPDATE agents SET
 				description = $2,
 				instructions = $3,
-				settings = $4,
-				updated_at = $5
+				url = $4,
+				settings = $5,
+				updated_at = $6
 			WHERE id = $1
 		`,
 		value.ID,
 		value.Description,
 		value.Instructions,
+		value.URL,
 		value.Settings,
 		value.UpdatedAt,
 	)

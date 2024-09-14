@@ -12,6 +12,8 @@ import (
 	"github.com/aacebo/agent.net/api/schemas"
 	"github.com/aacebo/agent.net/api/sockets"
 	"github.com/aacebo/agent.net/core"
+	"github.com/aacebo/agent.net/core/logger"
+	"github.com/aacebo/agent.net/core/models"
 	"github.com/aacebo/agent.net/core/repos"
 	"github.com/aacebo/agent.net/core/utils"
 	"github.com/aacebo/agent.net/postgres"
@@ -26,6 +28,8 @@ func main() {
 	startedAt := time.Now()
 	os.Setenv("TZ", "") // UTC
 	gob.Register(map[string]any{})
+	gob.Register(time.Time{})
+	models.Register()
 
 	pg := postgres.New()
 	defer pg.Close()
@@ -51,7 +55,7 @@ func main() {
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	r.Use(logger.Request(logger.New("agent.net/http")))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.NoCache)
 	r.Use(middleware.Timeout(60 * time.Second))
@@ -65,9 +69,9 @@ func main() {
 	})
 
 	r.Mount("/v1", routes.New(ctx))
+	err = http.ListenAndServe(fmt.Sprintf(":%s", utils.GetEnv("PORT", "3000")), r)
 
-	http.ListenAndServe(
-		fmt.Sprintf(":%s", utils.GetEnv("PORT", "3000")),
-		r,
-	)
+	if err != nil {
+		panic(err)
+	}
 }

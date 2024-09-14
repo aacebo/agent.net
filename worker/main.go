@@ -7,6 +7,7 @@ import (
 
 	"github.com/aacebo/agent.net/amqp"
 	"github.com/aacebo/agent.net/core"
+	"github.com/aacebo/agent.net/core/models"
 	"github.com/aacebo/agent.net/core/repos"
 	"github.com/aacebo/agent.net/postgres"
 	"github.com/aacebo/agent.net/worker/routes"
@@ -15,6 +16,7 @@ import (
 func main() {
 	os.Setenv("TZ", "") // UTC
 	gob.Register(map[string]any{})
+	models.Register()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
