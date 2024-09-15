@@ -12,19 +12,19 @@ func Request(log *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
-			lw := &loggingResponseWriter{w, http.StatusOK}
-
+			lw := newWrapResponseWriter(w, r.ProtoMajor)
 			next.ServeHTTP(lw, r)
 
 			if r.Method == http.MethodOptions {
 				return
 			}
 
-			status := Text(strconv.Itoa(lw.statusCode)).Bold()
+			statusCode := lw.Status()
+			status := Text(strconv.Itoa(statusCode)).Bold()
 
-			if lw.statusCode < 400 {
+			if statusCode < 400 {
 				status = status.GreenForeground()
-			} else if lw.statusCode < 500 {
+			} else if statusCode < 500 {
 				status = status.YellowForeground()
 			} else {
 				status = status.RedForeground()
@@ -50,14 +50,4 @@ func Request(log *slog.Logger) func(http.Handler) http.Handler {
 			))
 		})
 	}
-}
-
-type loggingResponseWriter struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func (self *loggingResponseWriter) WriteHeader(code int) {
-	self.statusCode = code
-	self.ResponseWriter.WriteHeader(code)
 }

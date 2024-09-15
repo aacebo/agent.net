@@ -1,12 +1,12 @@
-package sockets
+package ws
 
 import (
 	"fmt"
-	"log"
-	"os"
+	"log/slog"
 	"sync"
 	"time"
 
+	"github.com/aacebo/agent.net/core/logger"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -16,18 +16,18 @@ type Socket struct {
 	CreatedAt time.Time
 
 	conn *websocket.Conn
-	log  *log.Logger
+	log  *slog.Logger
 	mu   sync.RWMutex
 }
 
-func NewSocket(conn *websocket.Conn) *Socket {
+func newSocket(conn *websocket.Conn) *Socket {
 	id := uuid.NewString()
 	socket := Socket{
 		ID:        id,
 		CreatedAt: time.Now(),
 
 		conn: conn,
-		log:  log.New(os.Stdout, fmt.Sprintf("socket:%s ", id), log.Ldate|log.Ltime|log.Lshortfile),
+		log:  logger.New(fmt.Sprintf("agent.net/socket/%s", id)),
 		mu:   sync.RWMutex{},
 	}
 
@@ -35,24 +35,28 @@ func NewSocket(conn *websocket.Conn) *Socket {
 	return &socket
 }
 
-func (self *Socket) Read() (Event, error) {
-	event := Event{}
-	err := self.conn.ReadJSON(&event)
+func (self *Socket) Read() (Message, error) {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+
+	msg := Message{}
+	err := self.conn.ReadJSON(&msg)
 
 	if err != nil {
-		self.log.Println(err.Error())
+		self.log.Warn(err.Error())
 	}
 
-	return event, err
+	return msg, err
 }
 
-func (self *Socket) Send(event Event) error {
+func (self *Socket) Send(msg Message) error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	err := self.conn.WriteJSON(event)
+
+	err := self.conn.WriteJSON(msg)
 
 	if err != nil {
-		self.log.Println(err.Error())
+		self.log.Warn(err.Error())
 		self.conn.Close()
 	}
 
@@ -64,7 +68,7 @@ func (self *Socket) onPing() {
 		err := self.conn.WriteMessage(websocket.PingMessage, []byte{})
 
 		if err != nil {
-			self.log.Println(err.Error())
+			self.log.Warn(err.Error())
 			self.conn.Close()
 			return
 		}

@@ -63,9 +63,10 @@ func Create(ctx context.Context) func(amqp091.Delivery) {
 		if parent != nil {
 			env = append(
 				env,
-				fmt.Sprintf("AGENT_PARENT_ID=%s", parent.ID),
-				fmt.Sprintf("AGENT_PARENT_URL=%s", *parent.URL),
+				fmt.Sprintf("AGENT_URL=%s", *parent.URL),
 			)
+		} else {
+			env = append(env, fmt.Sprintf("AGENT_URL=%s", "wss://agent-net.ngrok.io/v1/sockets")) // if no parent, agent should connect to main server
 		}
 
 		res, err := docker.ContainerCreate(context.Background(), &container.Config{

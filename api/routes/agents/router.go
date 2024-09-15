@@ -8,11 +8,6 @@ import (
 )
 
 func New(r chi.Router, ctx context.Context) {
-	r.HandleFunc(
-		"/sockets",
-		Handler(ctx),
-	)
-
 	r.With(
 		middleware.WithBody[CreateBody](ctx, "/agents/create"),
 	).Post(

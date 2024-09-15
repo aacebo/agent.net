@@ -10,9 +10,8 @@ import (
 func New(ctx context.Context) *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Route("/", func(r chi.Router) {
-		agents.New(r, ctx)
-	})
+	agents.New(r, ctx)
+	r.HandleFunc("/sockets", Socket(ctx))
 
 	return r
 }

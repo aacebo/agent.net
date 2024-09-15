@@ -4,24 +4,20 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/aacebo/agent.net/agent/sockets"
-	"github.com/aacebo/agent.net/amqp"
-	"github.com/google/uuid"
+	"github.com/aacebo/agent.net/ws"
 
 	"github.com/go-chi/render"
 	"github.com/gorilla/websocket"
 )
 
 func Socket(ctx context.Context) http.HandlerFunc {
-	amqp := ctx.Value("amqp").(*amqp.Client)
-	socks := ctx.Value("sockets").(*sockets.Client)
+	sockets := ctx.Value("sockets").(*ws.Sockets)
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := uuid.NewString()
 		conn, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
@@ -30,22 +26,18 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			return
 		}
 
-		socket := socks.Add(id, conn)
+		socket := sockets.Add(conn)
 
 		defer func() {
 			conn.Close()
-			socks.Del(id, socket.ID)
+			sockets.Del(socket.ID)
 		}()
 
 		for {
-			event, err := socket.Read()
+			_, err := socket.Read()
 
 			if err != nil {
 				return
-			}
-
-			if event.Type == sockets.Ack {
-				amqp.Ack(event.ID)
 			}
 		}
 	}

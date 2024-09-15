@@ -10,13 +10,13 @@ import (
 	"github.com/aacebo/agent.net/amqp"
 	"github.com/aacebo/agent.net/api/routes"
 	"github.com/aacebo/agent.net/api/schemas"
-	"github.com/aacebo/agent.net/api/sockets"
 	"github.com/aacebo/agent.net/core"
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/models"
 	"github.com/aacebo/agent.net/core/repos"
 	"github.com/aacebo/agent.net/core/utils"
 	"github.com/aacebo/agent.net/postgres"
+	"github.com/aacebo/agent.net/ws"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -47,7 +47,7 @@ func main() {
 		"amqp":         amqp,
 		"pg":           pg,
 		"schemas":      schemas,
-		"sockets":      sockets.New(),
+		"sockets":      ws.NewSockets(),
 		"repos.agents": repos.Agents(pg),
 	}
 
