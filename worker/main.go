@@ -11,6 +11,7 @@ import (
 	"github.com/aacebo/agent.net/core/repos"
 	"github.com/aacebo/agent.net/postgres"
 	"github.com/aacebo/agent.net/worker/routes"
+	"github.com/docker/docker/client"
 )
 
 func main() {
@@ -26,9 +27,19 @@ func main() {
 	amqp := amqp.New()
 	defer amqp.Close()
 
+	docker, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
 	ctx := core.Context{
 		"amqp":         amqp,
 		"pg":           pg,
+		"docker":       docker,
 		"repos.agents": repos.Agents(pg),
 	}
 

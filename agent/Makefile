@@ -7,3 +7,9 @@ run:
 build:
 	GOOS=linux GOARCH=386 go build -o bin/main-linux-386 main.go
 	GOOS=linux GOARCH=arm64 go build -o bin/main-linux-arm64 main.go
+
+docker.build:
+	docker build -t agent.net/agent .
+
+docker.run:
+	docker run -i -t agent.net/agent

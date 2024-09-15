@@ -14,6 +14,7 @@
     },
     "settings": {
       "type": "object",
+      "description": "the agents settings",
       "properties": {
         "model": {
           "type": "string",

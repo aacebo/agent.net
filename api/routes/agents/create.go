@@ -23,7 +23,6 @@ func Create(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		parent, isChild := r.Context().Value("agent").(models.Agent)
 		body := r.Context().Value("body").(CreateBody)
-
 		agent := models.NewAgent()
 
 		if isChild {

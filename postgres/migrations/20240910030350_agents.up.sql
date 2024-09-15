@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS agents (
     id          	UUID         	PRIMARY KEY,
 	parent_id		UUID			REFERENCES agents(id) ON DELETE CASCADE,
+	container_id	TEXT,
+	status			TEXT			NOT NULL,
 	description		TEXT			NOT NULL,
 	instructions	TEXT,
 	url				TEXT,

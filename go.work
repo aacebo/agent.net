@@ -5,3 +5,4 @@ use ./api
 use ./core
 use ./postgres
 use ./worker
+use ./agent

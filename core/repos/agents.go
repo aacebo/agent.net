@@ -36,6 +36,8 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 			SELECT
 				id,
 				parent_id,
+				container_id,
+				status,
 				description,
 				instructions,
 				url,
@@ -51,6 +53,8 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 	).Scan(
 		&v.ID,
 		&v.ParentID,
+		&v.ContainerID,
+		&v.Status,
 		&v.Description,
 		&v.Instructions,
 		&v.URL,
@@ -81,6 +85,8 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 			INSERT INTO agents (
 				id,
 				parent_id,
+				container_id,
+				status,
 				description,
 				instructions,
 				url,
@@ -99,11 +105,15 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 				$7,
 				$8,
 				$9,
-				$10
+				$10,
+				$11,
+				$12
 			)
 		`,
 		value.ID,
 		value.ParentID,
+		value.ContainerID,
+		value.Status,
 		value.Description,
 		value.Instructions,
 		value.URL,
@@ -127,14 +137,18 @@ func (self AgentsRepository) Update(value models.Agent) models.Agent {
 	_, err := self.pg.Exec(
 		`
 			UPDATE agents SET
-				description = $2,
-				instructions = $3,
-				url = $4,
-				settings = $5,
-				updated_at = $6
+				container_id = $2,
+				status = $3,
+				description = $4,
+				instructions = $5,
+				url = $6,
+				settings = $7,
+				updated_at = $8
 			WHERE id = $1
 		`,
 		value.ID,
+		value.ContainerID,
+		value.Status,
 		value.Description,
 		value.Instructions,
 		value.URL,

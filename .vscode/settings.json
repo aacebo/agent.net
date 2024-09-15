@@ -1,4 +1,5 @@
 {
+  "go.lintOnSave": "off",
   "rest-client.enableTelemetry": false,
   "rest-client.defaultHeaders": {
     "User-Agent": "vscode-restclient",
