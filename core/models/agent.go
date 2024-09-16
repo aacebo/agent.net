@@ -15,7 +15,7 @@ type Agent struct {
 	Description  string        `json:"description"`
 	Status       AgentStatus   `json:"status"`
 	Instructions *string       `json:"instructions,omitempty"`
-	URL          *string       `json:"url,omitempty"`
+	Address      *string       `json:"address,omitempty"`
 	ClientID     string        `json:"-"`
 	ClientSecret Secret        `json:"-"`
 	Settings     AgentSettings `json:"settings"`

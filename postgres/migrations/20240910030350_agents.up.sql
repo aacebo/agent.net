@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS agents (
 	status			TEXT			NOT NULL,
 	description		TEXT			NOT NULL,
 	instructions	TEXT,
-	url				TEXT,
+	address			TEXT,
 	client_id		TEXT			NOT NULL,
 	client_secret	TEXT			NOT NULL,
 	settings		JSONB			NOT NULL,

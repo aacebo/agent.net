@@ -95,7 +95,7 @@ func onStatResponse(ctx context.Context) func(any, *ws.Socket) {
 		}
 
 		agent.Status = models.AGENT_STATUS_UP
-		agent.URL = &ipAddress
+		agent.Address = &ipAddress
 		agent = agents.Update(agent)
 	}
 }

@@ -46,7 +46,7 @@ func Create(ctx context.Context) func(amqp091.Delivery) {
 			}
 		}
 
-		if parent != nil && parent.URL == nil {
+		if parent != nil && parent.Address == nil {
 			log.Warn("agent created but not deployed due to parent not being deployed")
 			m.Nack(false, true)
 			return
@@ -63,7 +63,7 @@ func Create(ctx context.Context) func(amqp091.Delivery) {
 		if parent != nil {
 			env = append(
 				env,
-				fmt.Sprintf("AGENT_URL=%s", *parent.URL),
+				fmt.Sprintf("AGENT_URL=%s", *parent.Address),
 			)
 		} else {
 			env = append(env, fmt.Sprintf("AGENT_URL=%s", "wss://agent-net.ngrok.io/v1/sockets")) // if no parent, agent should connect to main server
