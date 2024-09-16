@@ -22,4 +22,18 @@ func New(r chi.Router, ctx context.Context) {
 		"/agents/{agent_id}/agents",
 		Create(ctx),
 	)
+
+	r.With(
+		middleware.WithAgent(ctx),
+	).Post(
+		"/agents/{agent_id}/start",
+		Start(ctx),
+	)
+
+	r.With(
+		middleware.WithAgent(ctx),
+	).Post(
+		"/agents/{agent_id}/stop",
+		Stop(ctx),
+	)
 }

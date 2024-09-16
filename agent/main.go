@@ -23,7 +23,7 @@ import (
 func main() {
 	startedAt := time.Now()
 	id := os.Getenv("AGENT_ID")
-	url := os.Getenv("AGENT_URL")
+	address := os.Getenv("AGENT_ADDRESS")
 	clientId := os.Getenv("AGENT_CLIENT_ID")
 	clientSecret := os.Getenv("AGENT_CLIENT_SECRET")
 	description := os.Getenv("AGENT_DESCRIPTION")
@@ -32,7 +32,7 @@ func main() {
 	sockets := ws.NewSockets()
 	client := client.New(
 		id,
-		url,
+		address,
 		description,
 		startedAt,
 		sockets,
@@ -40,7 +40,7 @@ func main() {
 
 	ctx := core.Context{
 		"id":            id,
-		"url":           url,
+		"address":       address,
 		"client_id":     clientId,
 		"client_secret": clientSecret,
 		"description":   description,

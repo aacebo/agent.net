@@ -39,9 +39,7 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			sockets.Del(socket.ID)
 		}()
 
-		go func() {
-			socket.Send(ws.NewQueryMessage("stat"))
-		}()
+		socket.Send(ws.NewQueryMessage("stat"))
 
 		for {
 			message, err := socket.Read()

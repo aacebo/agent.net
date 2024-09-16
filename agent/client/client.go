@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"slices"
@@ -13,7 +14,7 @@ import (
 )
 
 type Client struct {
-	url     string
+	address string
 	stat    models.Stat
 	client  *ws.Client
 	sockets *ws.Sockets
@@ -23,13 +24,13 @@ type Client struct {
 
 func New(
 	id string,
-	url string,
+	address string,
 	description string,
 	startedAt time.Time,
 	sockets *ws.Sockets,
 ) *Client {
 	return &Client{
-		url: url,
+		address: address,
 		stat: models.Stat{
 			ID:          id,
 			Description: description,
@@ -52,7 +53,7 @@ func (self *Client) Listen(clientId string, clientSecret string) {
 	header.Add("client_id", clientId)
 	header.Add("client_secret", clientSecret)
 
-	if err := self.client.Connect(self.url, header); err != nil {
+	if err := self.client.Connect(fmt.Sprintf("wss://%s/v1/sockets", self.address), header); err != nil {
 		panic(err)
 	}
 

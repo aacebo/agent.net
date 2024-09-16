@@ -1,0 +1,1 @@
+POST {{base_url}}/v1/agents/1/start
