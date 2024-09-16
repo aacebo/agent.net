@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -33,8 +34,6 @@ func (self *Client) Connect(url string, headers http.Header) error {
 }
 
 func (self *Client) Close() error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
 	return self.conn.Close()
 }
 
@@ -44,6 +43,12 @@ func (self *Client) Read() (Message, error) {
 
 	msg := Message{}
 	err := self.conn.ReadJSON(&msg)
+
+	if err != nil {
+		return msg, err
+	}
+
+	fmt.Println(msg)
 	return msg, err
 }
 
@@ -51,5 +56,12 @@ func (self *Client) Send(msg Message) error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 
-	return self.conn.WriteJSON(msg)
+	err := self.conn.WriteJSON(msg)
+
+	if err != nil {
+		self.conn.Close()
+		return err
+	}
+
+	return err
 }

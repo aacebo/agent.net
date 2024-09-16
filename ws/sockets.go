@@ -29,6 +29,21 @@ func (self *Sockets) Get() *Socket {
 	return self.sockets[seed.Intn(len(self.sockets))]
 }
 
+func (self *Sockets) GetByID(id string) *Socket {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+
+	i := slices.IndexFunc(self.sockets, func(s *Socket) bool {
+		return s.ID == id
+	})
+
+	if i == -1 {
+		return nil
+	}
+
+	return self.sockets[i]
+}
+
 func (self *Sockets) Add(conn *websocket.Conn) *Socket {
 	self.mu.Lock()
 	defer self.mu.Unlock()

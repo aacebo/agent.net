@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aacebo/agent.net/agent/client"
 	"github.com/aacebo/agent.net/agent/routes"
 	"github.com/aacebo/agent.net/core"
 	"github.com/aacebo/agent.net/core/logger"
@@ -21,8 +22,6 @@ import (
 
 func main() {
 	startedAt := time.Now()
-	log := logger.New("agents.net/agent")
-
 	id := os.Getenv("AGENT_ID")
 	url := os.Getenv("AGENT_URL")
 	clientId := os.Getenv("AGENT_CLIENT_ID")
@@ -30,11 +29,14 @@ func main() {
 	description := os.Getenv("AGENT_DESCRIPTION")
 	instructions := os.Getenv("AGENT_INSTRUCTIONS")
 
-	client := ws.NewClient()
-	clientHeaders := http.Header{
-		"client_id":     {clientId},
-		"client_secret": {clientSecret},
-	}
+	sockets := ws.NewSockets()
+	client := client.New(
+		id,
+		url,
+		description,
+		startedAt,
+		sockets,
+	)
 
 	ctx := core.Context{
 		"id":            id,
@@ -44,7 +46,7 @@ func main() {
 		"description":   description,
 		"instructions":  instructions,
 		"socket":        client,
-		"sockets":       ws.NewSockets(),
+		"sockets":       sockets,
 	}
 
 	wg := sync.WaitGroup{}
@@ -80,23 +82,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-
-		if err := client.Connect(url, clientHeaders); err != nil {
-			panic(err)
-		}
-
-		defer client.Close()
-		log.Info("connected...")
-
-		for {
-			message, err := client.Read()
-
-			if err != nil {
-				return
-			}
-
-			log.Debug(message.String())
-		}
+		client.Listen(clientId, clientSecret)
 	}()
 
 	wg.Wait()

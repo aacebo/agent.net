@@ -31,8 +31,12 @@ func newSocket(conn *websocket.Conn) *Socket {
 		mu:   sync.RWMutex{},
 	}
 
-	go socket.onPing()
+	go socket.ping()
 	return &socket
+}
+
+func (self *Socket) IPAddress() string {
+	return self.conn.RemoteAddr().String()
 }
 
 func (self *Socket) Read() (Message, error) {
@@ -44,8 +48,10 @@ func (self *Socket) Read() (Message, error) {
 
 	if err != nil {
 		self.log.Warn(err.Error())
+		return msg, err
 	}
 
+	self.log.Debug(msg.String())
 	return msg, err
 }
 
@@ -63,7 +69,7 @@ func (self *Socket) Send(msg Message) error {
 	return err
 }
 
-func (self *Socket) onPing() {
+func (self *Socket) ping() {
 	for range time.Tick(20 * time.Second) {
 		err := self.conn.WriteMessage(websocket.PingMessage, []byte{})
 
