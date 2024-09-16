@@ -10,6 +10,8 @@ import (
 )
 
 type IAgentsRepository interface {
+	Get() []models.Agent
+	GetEdges(parentId string) []models.Agent
 	GetByID(id string) (models.Agent, bool)
 
 	Create(value models.Agent) models.Agent
@@ -27,6 +29,121 @@ func Agents(pg *sql.DB) AgentsRepository {
 		pg:  pg,
 		log: logger.New("agent.net/repos/agents"),
 	}
+}
+
+func (self AgentsRepository) Get() []models.Agent {
+	rows, err := self.pg.Query(
+		`
+			SELECT
+				id,
+				parent_id,
+				container_id,
+				status,
+				description,
+				instructions,
+				address,
+				client_id,
+				client_secret,
+				settings,
+				created_at,
+				updated_at
+			FROM agents
+			WHERE parent_id IS NULL
+		`,
+	)
+
+	if err != nil {
+		self.log.Error(err.Error())
+		return []models.Agent{}
+	}
+
+	defer rows.Close()
+	arr := []models.Agent{}
+
+	for rows.Next() {
+		v := models.Agent{}
+		err := rows.Scan(
+			&v.ID,
+			&v.ParentID,
+			&v.ContainerID,
+			&v.Status,
+			&v.Description,
+			&v.Instructions,
+			&v.Address,
+			&v.ClientID,
+			&v.ClientSecret,
+			&v.Settings,
+			&v.CreatedAt,
+			&v.UpdatedAt,
+		)
+
+		if err != nil {
+			self.log.Error(err.Error())
+			return arr
+		}
+
+		arr = append(arr, v)
+	}
+
+	return arr
+}
+
+func (self AgentsRepository) GetEdges(parentId string) []models.Agent {
+	rows, err := self.pg.Query(
+		`
+			SELECT
+				id,
+				parent_id,
+				container_id,
+				status,
+				description,
+				instructions,
+				address,
+				client_id,
+				client_secret,
+				settings,
+				created_at,
+				updated_at
+			FROM agents
+			WHERE parent_id = $1
+		`,
+		parentId,
+	)
+
+	if err != nil {
+		self.log.Error(err.Error())
+		return []models.Agent{}
+	}
+
+	defer rows.Close()
+	arr := []models.Agent{}
+
+	for rows.Next() {
+		v := models.Agent{}
+		err := rows.Scan(
+			&v.ID,
+			&v.ParentID,
+			&v.ContainerID,
+			&v.Status,
+			&v.Description,
+			&v.Instructions,
+			&v.Address,
+			&v.ClientID,
+			&v.ClientSecret,
+			&v.Settings,
+			&v.CreatedAt,
+			&v.UpdatedAt,
+		)
+
+		if err != nil {
+			self.log.Error(err.Error())
+			return arr
+		}
+
+		arr = append(arr, v)
+	}
+
+	return arr
 }
 
 func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {

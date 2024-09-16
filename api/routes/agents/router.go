@@ -8,6 +8,15 @@ import (
 )
 
 func New(r chi.Router, ctx context.Context) {
+	r.Get("/agents", Get(ctx))
+
+	r.With(
+		middleware.WithAgent(ctx),
+	).Get(
+		"/agents/{agent_id}/agents",
+		Get(ctx),
+	)
+
 	r.With(
 		middleware.WithBody[CreateBody](ctx, "/agents/create"),
 	).Post(
