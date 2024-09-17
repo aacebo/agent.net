@@ -1,1 +1,1 @@
-POST {{base_url}}/v1/agents/edb32175-be76-453a-bd7e-a0bb4619cd83/start
+POST {{base_url}}/v1/agents/1/start

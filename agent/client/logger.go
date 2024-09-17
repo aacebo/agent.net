@@ -22,13 +22,13 @@ type LoggerClient struct {
 	log          *slog.Logger
 }
 
-func NewLogger(name string, baseUrl string) *LoggerClient {
+func NewLogger(name string) *LoggerClient {
 	client := http.Client{}
 
 	return &LoggerClient{
 		clientId:     os.Getenv("AGENT_CLIENT_ID"),
 		clientSecret: os.Getenv("AGENT_CLIENT_SECRET"),
-		baseUrl:      baseUrl,
+		baseUrl:      "agent-net.ngrok.io",
 		client:       &client,
 		log:          logger.New(name),
 	}

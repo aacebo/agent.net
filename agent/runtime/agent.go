@@ -52,10 +52,7 @@ func NewAgent(
 		StartedAt:     startedAt,
 		Edges:         []models.AgentStat{},
 
-		log: client.NewLogger(
-			fmt.Sprintf("agent.net/%s/runtime", name),
-			fmt.Sprintf("https://%s", parentAddress),
-		),
+		log:      client.NewLogger(fmt.Sprintf("agent.net/%s/runtime", name)),
 		parent:   ws.NewClient(),
 		children: ws.NewSockets(),
 		mu:       sync.RWMutex{},
