@@ -50,6 +50,7 @@ func (self *Socket) Read() (Message, error) {
 
 	if err != nil {
 		self.log.Warn(err.Error())
+		self.conn.Close()
 		return msg, err
 	}
 
@@ -80,7 +81,6 @@ func (self *Socket) ping() {
 		err := self.conn.WriteMessage(websocket.PingMessage, []byte{})
 
 		if err != nil {
-			self.log.Warn(err.Error())
 			self.conn.Close()
 			self.write.Unlock()
 			return

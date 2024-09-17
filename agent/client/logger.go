@@ -28,7 +28,7 @@ func NewLogger(name string) *LoggerClient {
 	return &LoggerClient{
 		clientId:     os.Getenv("AGENT_CLIENT_ID"),
 		clientSecret: os.Getenv("AGENT_CLIENT_SECRET"),
-		baseUrl:      "agent-net.ngrok.io",
+		baseUrl:      "https://agent-net.ngrok.io",
 		client:       &client,
 		log:          logger.New(name),
 	}

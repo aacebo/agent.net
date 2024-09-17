@@ -1,19 +1,24 @@
 package ws
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
-	conn  *websocket.Conn
-	log   *slog.Logger
-	read  sync.Mutex
-	write sync.Mutex
+	url               string
+	headers           http.Header
+	conn              *websocket.Conn
+	log               *slog.Logger
+	reconnectAttempts int
+	read              sync.Mutex
+	write             sync.Mutex
 }
 
 func NewClient() *Client {
@@ -34,7 +39,10 @@ func (self *Client) Connect(url string, headers http.Header) error {
 		return err
 	}
 
+	self.url = url
+	self.headers = headers
 	self.conn = conn
+	self.reconnectAttempts = 0
 	return nil
 }
 
@@ -50,7 +58,8 @@ func (self *Client) Read() (Message, error) {
 	err := self.conn.ReadJSON(&msg)
 
 	if err != nil {
-		return msg, err
+		self.reconnect()
+		return self.Read()
 	}
 
 	return msg, err
@@ -63,9 +72,24 @@ func (self *Client) Send(msg Message) error {
 	err := self.conn.WriteJSON(msg)
 
 	if err != nil {
-		self.conn.Close()
-		return err
+		self.reconnect()
+		return nil
 	}
 
 	return err
+}
+
+func (self *Client) reconnect() {
+	self.Close()
+
+	for {
+		self.reconnectAttempts++
+		ms := (500 * self.reconnectAttempts)
+		time.Sleep(time.Duration(ms) * time.Millisecond)
+		self.log.Debug(fmt.Sprintf("attempting reconnect %d...", self.reconnectAttempts))
+
+		if err := self.Connect(self.url, self.headers); err == nil {
+			break
+		}
+	}
 }
