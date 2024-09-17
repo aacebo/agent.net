@@ -4,6 +4,7 @@ POST {{base_url}}/v1/agents
 	"description": "a test agent",
 	"instructions": "do a thing",
 	"settings": {
+		"api_key": "test",
 		"model": "gpt-4o"
 	}
 }

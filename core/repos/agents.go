@@ -14,6 +14,7 @@ type IAgentsRepository interface {
 	Get() []models.Agent
 	GetEdges(parentId string) []models.Agent
 	GetByID(id string) (models.Agent, bool)
+	GetByName(name string) (models.Agent, bool)
 	GetByCredentials(clientId string, clientSecret string) (models.Agent, bool)
 
 	Create(value models.Agent) models.Agent
@@ -174,6 +175,55 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 			WHERE id = $1
 		`,
 		id,
+	).Scan(
+		&v.ID,
+		&v.ParentID,
+		&v.ContainerID,
+		&v.Status,
+		&v.Name,
+		&v.Description,
+		&v.Instructions,
+		&v.Address,
+		&v.ClientID,
+		&v.ClientSecret,
+		&v.Settings,
+		&v.CreatedAt,
+		&v.UpdatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return v, false
+		}
+
+		panic(err)
+	}
+
+	return v, true
+}
+
+func (self AgentsRepository) GetByName(name string) (models.Agent, bool) {
+	v := models.Agent{}
+	err := self.pg.QueryRow(
+		`
+			SELECT
+				id,
+				parent_id,
+				container_id,
+				status,
+				name,
+				description,
+				instructions,
+				address,
+				client_id,
+				client_secret,
+				settings,
+				created_at,
+				updated_at
+			FROM agents
+			WHERE name = $1
+		`,
+		name,
 	).Scan(
 		&v.ID,
 		&v.ParentID,

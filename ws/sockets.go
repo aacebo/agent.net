@@ -61,3 +61,16 @@ func (self *Sockets) Del(id string) {
 		return s.ID == id
 	})
 }
+
+func (self *Sockets) Send(msg Message) error {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+
+	for _, socket := range self.sockets {
+		if err := socket.Send(msg); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

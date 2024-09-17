@@ -2,9 +2,9 @@ package routes
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/models"
@@ -16,7 +16,9 @@ import (
 )
 
 func Socket(ctx context.Context) http.HandlerFunc {
-	onStatResponse := onStatResponse(ctx)
+	log := logger.New("agent.net/api/sockets")
+	onConnected := onConnected(ctx)
+	onDisconnected := onDisconnected(ctx)
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 	sockets := ctx.Value("sockets").(*ws.Sockets)
 	upgrader := websocket.Upgrader{
@@ -28,16 +30,7 @@ func Socket(ctx context.Context) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		clientId := r.Header.Get("client_id")
-		clientSecret := r.Header.Get("client_secret")
-
-		agent, exists := agents.GetByCredentials(clientId, clientSecret)
-
-		if !exists {
-			render.Status(r, http.StatusUnauthorized)
-			render.JSON(w, r, "unauthorized")
-		}
-
+		agent := r.Context().Value("agent").(models.Agent)
 		conn, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
@@ -51,7 +44,7 @@ func Socket(ctx context.Context) http.HandlerFunc {
 		defer func() {
 			conn.Close()
 			sockets.Del(socket.ID)
-			agent, exists := agents.GetByCredentials(clientId, clientSecret)
+			agent, exists := agents.GetByID(agent.ID)
 
 			if !exists {
 				return
@@ -61,13 +54,10 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			agent = agents.Update(agent)
 		}()
 
-		go func() {
-			for range time.Tick(5 * time.Second) {
-				if err := socket.Send(ws.NewQueryMessage("stat")); err != nil {
-					return
-				}
-			}
-		}()
+		ipAddress := socket.IPAddress()
+		agent.Address = &ipAddress
+		agent.Status = models.AGENT_STATUS_UP
+		agent = agents.Update(agent)
 
 		for {
 			message, err := socket.Read()
@@ -77,40 +67,60 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			}
 
 			switch message.Type {
-			case ws.QUERY_RESPONSE_MESSAGE_TYPE:
-				body := message.Body.(ws.QueryResponseMessageBody)
+			case ws.CONNECTED_MESSAGE_TYPE:
+				err = onConnected(socket, message)
+			case ws.DISCONNECTED_MESSAGE_TYPE:
+				err = onDisconnected(socket, message)
+			}
 
-				switch body.Name {
-				case "stat":
-					onStatResponse(agent, body.Body, socket)
-				}
+			if err != nil {
+				log.Warn(err.Error())
+				return
 			}
 		}
 	}
 }
 
-func onStatResponse(ctx context.Context) func(models.Agent, any, *ws.Socket) {
+func onConnected(ctx context.Context) func(*ws.Socket, ws.Message) error {
 	log := logger.New("agent.net/api/sockets")
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
-	return func(agent models.Agent, data any, socket *ws.Socket) {
-		b, err := json.Marshal(data)
+	return func(socket *ws.Socket, msg ws.Message) error {
+		id := msg.Body.(string)
+		agent, exists := agents.GetByID(id)
 
-		if err != nil {
-			log.Error(err.Error())
-			return
-		}
-
-		stat := models.Stat{}
-
-		if err = json.Unmarshal(b, &stat); err != nil {
-			log.Error(err.Error())
-			return
+		if !exists {
+			return errors.New("agent not found")
 		}
 
 		ipAddress := socket.IPAddress()
-		agent.Status = models.AGENT_STATUS_UP
 		agent.Address = &ipAddress
+		agent.Status = models.AGENT_STATUS_UP
 		agent = agents.Update(agent)
+
+		log.Debug(fmt.Sprintf("agent '%s' connected", agent.Name))
+		return nil
+	}
+}
+
+func onDisconnected(ctx context.Context) func(*ws.Socket, ws.Message) error {
+	log := logger.New("agent.net/api/sockets")
+	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
+
+	return func(socket *ws.Socket, msg ws.Message) error {
+		id := msg.Body.(string)
+		agent, exists := agents.GetByID(id)
+
+		if !exists {
+			return errors.New("agent not found")
+		}
+
+		ipAddress := socket.IPAddress()
+		agent.Address = &ipAddress
+		agent.Status = models.AGENT_STATUS_DOWN
+		agent = agents.Update(agent)
+
+		log.Debug(fmt.Sprintf("agent '%s' disconnected", agent.Name))
+		return nil
 	}
 }

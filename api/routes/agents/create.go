@@ -2,6 +2,7 @@ package agents
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -36,6 +37,12 @@ func Create(ctx context.Context) http.HandlerFunc {
 
 		if body.Name != nil {
 			agent.Name = *body.Name
+		}
+
+		if _, exists := agents.GetByName(agent.Name); exists {
+			render.Status(r, http.StatusConflict)
+			render.JSON(w, r, fmt.Sprintf("agent with name '%s' already exists", agent.Name))
+			return
 		}
 
 		agent.Description = body.Description

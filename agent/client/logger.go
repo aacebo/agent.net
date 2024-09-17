@@ -88,8 +88,8 @@ func (self LoggerClient) Log(level models.LogLevel, text string, data map[string
 		return err
 	}
 
-	req.Header.Add("client_id", self.clientId)
-	req.Header.Add("client_secret", self.clientSecret)
+	req.Header.Add("X_CLIENT_ID", self.clientId)
+	req.Header.Add("X_CLIENT_SECRET", self.clientSecret)
 	res, err := self.client.Do(req)
 
 	if err != nil {

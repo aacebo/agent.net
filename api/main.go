@@ -50,6 +50,8 @@ func main() {
 		"sockets":          ws.NewSockets(),
 		"repos.agents":     repos.Agents(pg),
 		"repos.agent_logs": repos.AgentLogs(pg),
+		"repos.chats":      repos.Chats(pg),
+		"repos.messages":   repos.Messages(pg),
 	}
 
 	r := chi.NewRouter()

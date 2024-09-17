@@ -41,6 +41,10 @@ func (self *Socket) IPAddress() string {
 	return self.conn.RemoteAddr().String()
 }
 
+func (self *Socket) Close() error {
+	return self.conn.Close()
+}
+
 func (self *Socket) Read() (Message, error) {
 	self.read.Lock()
 	defer self.read.Unlock()

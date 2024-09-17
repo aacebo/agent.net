@@ -2,6 +2,7 @@ package agents
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/aacebo/agent.net/amqp"
@@ -15,7 +16,7 @@ import (
 )
 
 func Start(ctx context.Context) func(amqp091.Delivery) {
-	log := logger.New("agent.net/worker/agents/deploy")
+	log := logger.New("agent.net/worker/agents/start")
 	docker := ctx.Value("docker").(*client.Client)
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
@@ -52,12 +53,22 @@ func Start(ctx context.Context) func(amqp091.Delivery) {
 			return
 		}
 
+		settings, err := json.Marshal(agent.Settings)
+
+		if err != nil {
+			log.Error(err.Error())
+			m.Nack(false, true)
+			return
+		}
+
 		env := []string{
 			fmt.Sprintf("AGENT_ID=%s", agent.ID),
 			fmt.Sprintf("AGENT_CLIENT_ID=%s", agent.ClientID),
 			fmt.Sprintf("AGENT_CLIENT_SECRET=%s", agent.ClientSecret),
+			fmt.Sprintf("AGENT_NAME=%s", agent.Name),
 			fmt.Sprintf("AGENT_DESCRIPTION=%s", agent.Description),
 			fmt.Sprintf("AGENT_INSTRUCTIONS=%s", *agent.Instructions),
+			fmt.Sprintf("AGENT_SETTINGS=%s", string(settings)),
 		}
 
 		if parent != nil {
@@ -92,9 +103,7 @@ func Start(ctx context.Context) func(amqp091.Delivery) {
 			return
 		}
 
-		agent.Status = models.AGENT_STATUS_UP
-		agent = agents.Update(agent)
-
+		log.Debug(fmt.Sprintf("agent started: %s", agent.ID))
 		m.Ack(false)
 	}
 }

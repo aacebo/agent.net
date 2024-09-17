@@ -8,8 +8,9 @@ import (
 )
 
 type AgentSettings struct {
+	ApiKey           string   `json:"api_key"`
 	Model            string   `json:"model"`                       // https://platform.openai.com/docs/api-reference/chat/create#chat-create-model
-	FrequencyPenalty *int     `json:"frequency_penalty,omitempty"` // https://platform.openai.com/docs/api-reference/chat/create#chat-create-frequency_penalty
+	FrequencyPenalty *float32 `json:"frequency_penalty,omitempty"` // https://platform.openai.com/docs/api-reference/chat/create#chat-create-frequency_penalty
 	LogitBias        Map[any] `json:"logit_bias,omitempty"`        // https://platform.openai.com/docs/api-reference/chat/create#chat-create-logit_bias
 	LogProbs         *bool    `json:"logprobs,omitempty"`          // https://platform.openai.com/docs/api-reference/chat/create#chat-create-logprobs
 }

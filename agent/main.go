@@ -7,12 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aacebo/agent.net/agent/client"
 	"github.com/aacebo/agent.net/agent/routes"
+	"github.com/aacebo/agent.net/agent/runtime"
 	"github.com/aacebo/agent.net/core"
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/utils"
-	"github.com/aacebo/agent.net/ws"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -26,16 +25,17 @@ func main() {
 	address := os.Getenv("AGENT_ADDRESS")
 	clientId := os.Getenv("AGENT_CLIENT_ID")
 	clientSecret := os.Getenv("AGENT_CLIENT_SECRET")
+	name := os.Getenv("AGENT_NAME")
 	description := os.Getenv("AGENT_DESCRIPTION")
 	instructions := os.Getenv("AGENT_INSTRUCTIONS")
-
-	sockets := ws.NewSockets()
-	client := client.New(
+	runtime := runtime.NewAgent(
 		id,
 		address,
+		name,
 		description,
+		clientId,
+		clientSecret,
 		startedAt,
-		sockets,
 	)
 
 	ctx := core.Context{
@@ -45,8 +45,7 @@ func main() {
 		"client_secret": clientSecret,
 		"description":   description,
 		"instructions":  instructions,
-		"socket":        client,
-		"sockets":       sockets,
+		"runtime":       runtime,
 	}
 
 	wg := sync.WaitGroup{}
@@ -82,7 +81,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		client.Listen(clientId, clientSecret)
+		runtime.Listen()
 	}()
 
 	wg.Wait()

@@ -2,20 +2,19 @@ package agents
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aacebo/agent.net/amqp"
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/models"
-	"github.com/aacebo/agent.net/core/repos"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/rabbitmq/amqp091-go"
 )
 
 func Stop(ctx context.Context) func(amqp091.Delivery) {
-	log := logger.New("agent.net/worker/agents/deploy")
+	log := logger.New("agent.net/worker/agents/stop")
 	docker := ctx.Value("docker").(*client.Client)
-	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
 	return func(m amqp091.Delivery) {
 		event := amqp.Event{}
@@ -52,9 +51,7 @@ func Stop(ctx context.Context) func(amqp091.Delivery) {
 			return
 		}
 
-		agent.Status = models.AGENT_STATUS_DOWN
-		agent = agents.Update(agent)
-
+		log.Debug(fmt.Sprintf("agent stopped: %s", agent.ID))
 		m.Ack(false)
 	}
 }

@@ -4,8 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/aacebo/agent.net/agent/client"
-	"github.com/aacebo/agent.net/core/models"
+	"github.com/aacebo/agent.net/agent/runtime"
 	"github.com/aacebo/agent.net/ws"
 
 	"github.com/go-chi/render"
@@ -13,8 +12,7 @@ import (
 )
 
 func Socket(ctx context.Context) http.HandlerFunc {
-	c := ctx.Value("socket").(*client.Client)
-	sockets := ctx.Value("sockets").(*ws.Sockets)
+	runtime := ctx.Value("runtime").(*runtime.Agent)
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -24,6 +22,7 @@ func Socket(ctx context.Context) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		agentId := r.Header.Get("X_AGENT_ID")
 		conn, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
@@ -32,14 +31,14 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			return
 		}
 
-		socket := sockets.Add(conn)
+		socket := runtime.Add(r, conn)
 
 		defer func() {
-			conn.Close()
-			sockets.Del(socket.ID)
+			runtime.Remove(socket.ID)
+			runtime.SendToParent(ws.NewDisconnectedMessage(agentId))
 		}()
 
-		socket.Send(ws.NewQueryMessage("stat"))
+		runtime.SendToParent(ws.NewConnectedMessage(agentId))
 
 		for {
 			message, err := socket.Read()
@@ -49,22 +48,10 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			}
 
 			switch message.Type {
-			case ws.QUERY_RESPONSE_MESSAGE_TYPE:
-				body := message.Body.(ws.QueryResponseMessageBody)
-
-				switch body.Name {
-				case "stat":
-					stat := body.Body.(models.Stat)
-					c.SetAgent(models.AgentStat{
-						ID:          stat.ID,
-						SocketID:    socket.ID,
-						Description: stat.Description,
-						IPAddress:   socket.IPAddress(),
-						StartedAt:   stat.StartedAt,
-					})
-
-					c.Send(ws.NewQueryResponseMessage("stat", c.Stat()))
-				}
+			case ws.CONNECTED_MESSAGE_TYPE:
+				runtime.SendToParent(message)
+			case ws.DISCONNECTED_MESSAGE_TYPE:
+				runtime.SendToParent(message)
 			}
 		}
 	}

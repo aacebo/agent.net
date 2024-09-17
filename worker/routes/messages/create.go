@@ -1,4 +1,4 @@
-package agents
+package messages
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 )
 
 func Create(ctx context.Context) func(amqp091.Delivery) {
-	log := logger.New("agent.net/worker/agents/create")
+	log := logger.New("agent.net/worker/messages/create")
 
 	return func(m amqp091.Delivery) {
 		event := amqp.Event{}
@@ -22,7 +22,7 @@ func Create(ctx context.Context) func(amqp091.Delivery) {
 			return
 		}
 
-		agent, ok := event.Body.(models.Agent)
+		message, ok := event.Body.(models.Message)
 
 		if !ok {
 			log.Error("failed to decode event body: %v", event.Body)
@@ -30,7 +30,7 @@ func Create(ctx context.Context) func(amqp091.Delivery) {
 			return
 		}
 
-		log.Debug(fmt.Sprintf("agent created: %s", agent.ID))
+		log.Debug(fmt.Sprintf("message created: %s", message.ID))
 		m.Ack(false)
 	}
 }
