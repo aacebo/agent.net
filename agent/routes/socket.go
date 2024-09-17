@@ -13,6 +13,7 @@ import (
 
 func Socket(ctx context.Context) http.HandlerFunc {
 	runtime := ctx.Value("runtime").(*runtime.Agent)
+	log := runtime.Logger()
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -23,11 +24,13 @@ func Socket(ctx context.Context) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		agentId := r.Header.Get("X_AGENT_ID")
+		agentAddress := r.Header.Get("X_AGENT_ADDRESS")
 		conn, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
 			render.Status(r, 500)
 			render.JSON(w, r, err.Error())
+			log.Error(err.Error(), nil)
 			return
 		}
 
@@ -38,7 +41,10 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			runtime.SendToParent(ws.NewDisconnectedMessage(agentId))
 		}()
 
-		runtime.SendToParent(ws.NewConnectedMessage(agentId))
+		runtime.SendToParent(ws.NewConnectedMessage(ws.ConnectedMessageBody{
+			"id":      agentId,
+			"address": agentAddress,
+		}))
 
 		for {
 			message, err := socket.Read()

@@ -33,11 +33,11 @@ func NewTextMessage(text string) Message {
 	}
 }
 
-func NewConnectedMessage(id string) Message {
+func NewConnectedMessage(body ConnectedMessageBody) Message {
 	return Message{
 		ID:     uuid.NewString(),
 		Type:   CONNECTED_MESSAGE_TYPE,
-		Body:   id,
+		Body:   body,
 		SentAt: time.Now(),
 	}
 }
@@ -59,4 +59,14 @@ func (self Message) WithToID(toId string) Message {
 func (self Message) String() string {
 	b, _ := json.Marshal(self)
 	return string(b)
+}
+
+type ConnectedMessageBody map[string]any
+
+func (self ConnectedMessageBody) ID() string {
+	return self["id"].(string)
+}
+
+func (self ConnectedMessageBody) Address() string {
+	return self["address"].(string)
 }

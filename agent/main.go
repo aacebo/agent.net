@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"sync"
@@ -22,15 +23,29 @@ import (
 func main() {
 	startedAt := time.Now()
 	id := os.Getenv("AGENT_ID")
-	address := os.Getenv("AGENT_ADDRESS")
+	parentAddress := os.Getenv("AGENT_ADDRESS")
 	clientId := os.Getenv("AGENT_CLIENT_ID")
 	clientSecret := os.Getenv("AGENT_CLIENT_SECRET")
 	name := os.Getenv("AGENT_NAME")
 	description := os.Getenv("AGENT_DESCRIPTION")
 	instructions := os.Getenv("AGENT_INSTRUCTIONS")
+
+	addrs, _ := net.InterfaceAddrs()
+	address := ""
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				address = ipnet.IP.String()
+				break
+			}
+		}
+	}
+
 	runtime := runtime.NewAgent(
 		id,
 		address,
+		parentAddress,
 		name,
 		description,
 		clientId,
@@ -72,7 +87,7 @@ func main() {
 		})
 
 		r.Mount("/v1", routes.New(ctx))
-		err := http.ListenAndServe(fmt.Sprintf(":%s", utils.GetEnv("PORT", "8080")), r)
+		err := http.ListenAndServe(fmt.Sprintf(":%s", utils.GetEnv("PORT", "80")), r)
 
 		if err != nil {
 			panic(err)

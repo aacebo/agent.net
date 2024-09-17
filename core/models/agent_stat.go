@@ -10,7 +10,6 @@ type AgentStat struct {
 	SocketID    string    `json:"socket_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	IPAddress   string    `json:"ip_address"`
 	StartedAt   time.Time `json:"started_at"`
 }
 

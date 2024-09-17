@@ -31,6 +31,7 @@ func Socket(ctx context.Context) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		agent := r.Context().Value("agent").(models.Agent)
+		agentAddress := r.Header.Get("X_AGENT_ADDRESS")
 		conn, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
@@ -51,12 +52,12 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			}
 
 			agent.Status = models.AGENT_STATUS_DOWN
+			agent.Address = nil
 			agent = agents.Update(agent)
 		}()
 
-		ipAddress := socket.IPAddress()
-		agent.Address = &ipAddress
 		agent.Status = models.AGENT_STATUS_UP
+		agent.Address = &agentAddress
 		agent = agents.Update(agent)
 
 		for {
@@ -86,16 +87,16 @@ func onConnected(ctx context.Context) func(*ws.Socket, ws.Message) error {
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
 	return func(socket *ws.Socket, msg ws.Message) error {
-		id := msg.Body.(string)
-		agent, exists := agents.GetByID(id)
+		body := ws.ConnectedMessageBody(msg.Body.(map[string]any))
+		address := body.Address()
+		agent, exists := agents.GetByID(body.ID())
 
 		if !exists {
 			return errors.New("agent not found")
 		}
 
-		ipAddress := socket.IPAddress()
-		agent.Address = &ipAddress
 		agent.Status = models.AGENT_STATUS_UP
+		agent.Address = &address
 		agent = agents.Update(agent)
 
 		log.Debug(fmt.Sprintf("agent '%s' connected", agent.Name))
@@ -115,8 +116,6 @@ func onDisconnected(ctx context.Context) func(*ws.Socket, ws.Message) error {
 			return errors.New("agent not found")
 		}
 
-		ipAddress := socket.IPAddress()
-		agent.Address = &ipAddress
 		agent.Status = models.AGENT_STATUS_DOWN
 		agent = agents.Update(agent)
 

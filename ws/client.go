@@ -53,7 +53,6 @@ func (self *Client) Read() (Message, error) {
 		return msg, err
 	}
 
-	self.log.Debug(msg.String())
 	return msg, err
 }
 
@@ -68,6 +67,5 @@ func (self *Client) Send(msg Message) error {
 		return err
 	}
 
-	self.log.Debug(msg.String())
 	return err
 }

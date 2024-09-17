@@ -37,10 +37,6 @@ func newSocket(conn *websocket.Conn) *Socket {
 	return &socket
 }
 
-func (self *Socket) IPAddress() string {
-	return self.conn.RemoteAddr().String()
-}
-
 func (self *Socket) Close() error {
 	return self.conn.Close()
 }

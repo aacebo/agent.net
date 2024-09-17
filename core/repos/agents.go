@@ -53,6 +53,7 @@ func (self AgentsRepository) Get() []models.Agent {
 				updated_at
 			FROM agents
 			WHERE parent_id IS NULL
+			ORDER BY updated_at DESC
 		`,
 	)
 

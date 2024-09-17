@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/aacebo/agent.net/amqp"
 	"github.com/aacebo/agent.net/core/logger"
@@ -19,6 +20,7 @@ func Start(ctx context.Context) func(amqp091.Delivery) {
 	log := logger.New("agent.net/worker/agents/start")
 	docker := ctx.Value("docker").(*client.Client)
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
+	port := 8080
 
 	return func(m amqp091.Delivery) {
 		event := amqp.Event{}
@@ -83,13 +85,21 @@ func Start(ctx context.Context) func(amqp091.Delivery) {
 		if agent.ContainerID == nil {
 			res, err := docker.ContainerCreate(context.Background(), &container.Config{
 				Image:        "agent.net/agent",
-				ExposedPorts: nat.PortSet{"8080": struct{}{}},
+				ExposedPorts: nat.PortSet{"80/tcp": {}},
 				Env:          env,
-			}, nil, nil, nil, fmt.Sprintf("agent.net-agent-%s", agent.ID))
+				Tty:          true,
+			}, &container.HostConfig{
+				PortBindings: nat.PortMap{
+					nat.Port("80/tcp"): []nat.PortBinding{{
+						HostIP:   "0.0.0.0",
+						HostPort: strconv.Itoa(port),
+					}},
+				},
+			}, nil, nil, fmt.Sprintf("agent.net-agent-%s", agent.ID))
 
 			if err != nil {
 				log.Error(err.Error())
-				m.Nack(false, true)
+				m.Nack(false, false)
 				return
 			}
 
@@ -103,6 +113,7 @@ func Start(ctx context.Context) func(amqp091.Delivery) {
 			return
 		}
 
+		port++
 		log.Debug(fmt.Sprintf("agent started: %s", agent.ID))
 		m.Ack(false)
 	}

@@ -16,14 +16,15 @@ import (
 )
 
 type Agent struct {
-	ID           string
-	Address      string
-	Name         string
-	Description  string
-	ClientID     string
-	ClientSecret string
-	StartedAt    time.Time
-	Edges        []models.AgentStat
+	ID            string
+	Address       string
+	ParentAddress string
+	Name          string
+	Description   string
+	ClientID      string
+	ClientSecret  string
+	StartedAt     time.Time
+	Edges         []models.AgentStat
 
 	log      *client.LoggerClient
 	parent   *ws.Client
@@ -34,6 +35,7 @@ type Agent struct {
 func NewAgent(
 	id string,
 	address string,
+	parentAddress string,
 	name string,
 	description string,
 	clientId string,
@@ -41,22 +43,29 @@ func NewAgent(
 	startedAt time.Time,
 ) *Agent {
 	return &Agent{
-		ID:           id,
-		Address:      address,
-		Description:  description,
-		ClientID:     clientId,
-		ClientSecret: clientSecret,
-		StartedAt:    startedAt,
-		Edges:        []models.AgentStat{},
+		ID:            id,
+		Address:       address,
+		ParentAddress: parentAddress,
+		Description:   description,
+		ClientID:      clientId,
+		ClientSecret:  clientSecret,
+		StartedAt:     startedAt,
+		Edges:         []models.AgentStat{},
 
 		log: client.NewLogger(
 			fmt.Sprintf("agent.net/%s/runtime", name),
-			fmt.Sprintf("https://%s", address),
+			fmt.Sprintf("https://%s", parentAddress),
 		),
 		parent:   ws.NewClient(),
 		children: ws.NewSockets(),
 		mu:       sync.RWMutex{},
 	}
+}
+
+func (self *Agent) Logger() *client.LoggerClient {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.log
 }
 
 func (self *Agent) Add(r *http.Request, conn *websocket.Conn) *ws.Socket {
@@ -70,7 +79,6 @@ func (self *Agent) Add(r *http.Request, conn *websocket.Conn) *ws.Socket {
 		SocketID:    socket.ID,
 		Name:        r.Header.Get("X_AGENT_NAME"),
 		Description: r.Header.Get("X_AGENT_DESCRIPTION"),
-		IPAddress:   socket.IPAddress(),
 		StartedAt:   time.Now(),
 	}
 
