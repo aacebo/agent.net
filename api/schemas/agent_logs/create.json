@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "level": {
+      "type": "string",
+      "description": "the log level",
+      "enum": ["info", "warn", "error", "debug"]
+    },
+    "text": {
+      "type": "string",
+      "description": "the log text",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "data": {
+      "type": "object",
+      "description": "the log context data",
+      "default": { }
+    }
+  },
+  "required": ["level", "text"]
+}

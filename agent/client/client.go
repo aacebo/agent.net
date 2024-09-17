@@ -2,13 +2,11 @@ package client
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"slices"
 	"sync"
 	"time"
 
-	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/models"
 	"github.com/aacebo/agent.net/ws"
 )
@@ -18,7 +16,7 @@ type Client struct {
 	stat    models.Stat
 	client  *ws.Client
 	sockets *ws.Sockets
-	log     *slog.Logger
+	log     *LoggerClient
 	mu      sync.RWMutex
 }
 
@@ -39,7 +37,7 @@ func New(
 		},
 		client:  ws.NewClient(),
 		sockets: sockets,
-		log:     logger.New("agent.net/agent"),
+		log:     NewLogger(id, "agent.net/agent", fmt.Sprintf("https://%s", address)),
 		mu:      sync.RWMutex{},
 	}
 }
@@ -58,13 +56,13 @@ func (self *Client) Listen(clientId string, clientSecret string) {
 	}
 
 	defer self.client.Close()
-	self.log.Info("connected...")
+	self.log.Info("connected...", nil)
 
 	for {
 		message, err := self.client.Read()
 
 		if err != nil || !message.Type.Valid() {
-			self.log.Warn(err.Error())
+			self.log.Warn(err.Error(), nil)
 			return
 		}
 

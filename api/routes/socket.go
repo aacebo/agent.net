@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/aacebo/agent.net/core/logger"
@@ -17,6 +16,7 @@ import (
 
 func Socket(ctx context.Context) http.HandlerFunc {
 	onStatResponse := onStatResponse(ctx)
+	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 	sockets := ctx.Value("sockets").(*ws.Sockets)
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -27,6 +27,8 @@ func Socket(ctx context.Context) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		clientId := r.Header.Get("client_id")
+		clientSecret := r.Header.Get("client_secret")
 		conn, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
@@ -40,6 +42,14 @@ func Socket(ctx context.Context) http.HandlerFunc {
 		defer func() {
 			conn.Close()
 			sockets.Del(socket.ID)
+			agent, exists := agents.GetByCredentials(clientId, clientSecret)
+
+			if !exists {
+				return
+			}
+
+			agent.Status = models.AGENT_STATUS_DOWN
+			agent = agents.Update(agent)
 		}()
 
 		socket.Send(ws.NewQueryMessage("stat"))
@@ -50,8 +60,6 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			if err != nil {
 				return
 			}
-
-			fmt.Println(message)
 
 			switch message.Type {
 			case ws.QUERY_RESPONSE_MESSAGE_TYPE:

@@ -44,11 +44,12 @@ func main() {
 	}
 
 	ctx := core.Context{
-		"amqp":         amqp,
-		"pg":           pg,
-		"schemas":      schemas,
-		"sockets":      ws.NewSockets(),
-		"repos.agents": repos.Agents(pg),
+		"amqp":             amqp,
+		"pg":               pg,
+		"schemas":          schemas,
+		"sockets":          ws.NewSockets(),
+		"repos.agents":     repos.Agents(pg),
+		"repos.agent_logs": repos.AgentLogs(pg),
 	}
 
 	r := chi.NewRouter()

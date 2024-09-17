@@ -2,6 +2,7 @@ package repos
 
 import (
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -13,6 +14,7 @@ type IAgentsRepository interface {
 	Get() []models.Agent
 	GetEdges(parentId string) []models.Agent
 	GetByID(id string) (models.Agent, bool)
+	GetByCredentials(clientId string, clientSecret string) (models.Agent, bool)
 
 	Create(value models.Agent) models.Agent
 	Update(value models.Agent) models.Agent
@@ -39,6 +41,7 @@ func (self AgentsRepository) Get() []models.Agent {
 				parent_id,
 				container_id,
 				status,
+				name,
 				description,
 				instructions,
 				address,
@@ -67,6 +70,7 @@ func (self AgentsRepository) Get() []models.Agent {
 			&v.ParentID,
 			&v.ContainerID,
 			&v.Status,
+			&v.Name,
 			&v.Description,
 			&v.Instructions,
 			&v.Address,
@@ -96,6 +100,7 @@ func (self AgentsRepository) GetEdges(parentId string) []models.Agent {
 				parent_id,
 				container_id,
 				status,
+				name,
 				description,
 				instructions,
 				address,
@@ -125,6 +130,7 @@ func (self AgentsRepository) GetEdges(parentId string) []models.Agent {
 			&v.ParentID,
 			&v.ContainerID,
 			&v.Status,
+			&v.Name,
 			&v.Description,
 			&v.Instructions,
 			&v.Address,
@@ -155,6 +161,7 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 				parent_id,
 				container_id,
 				status,
+				name,
 				description,
 				instructions,
 				address,
@@ -172,6 +179,7 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 		&v.ParentID,
 		&v.ContainerID,
 		&v.Status,
+		&v.Name,
 		&v.Description,
 		&v.Instructions,
 		&v.Address,
@@ -193,6 +201,59 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 	return v, true
 }
 
+func (self AgentsRepository) GetByCredentials(clientId string, clientSecret string) (models.Agent, bool) {
+	v := models.Agent{}
+	err := self.pg.QueryRow(
+		`
+			SELECT
+				id,
+				parent_id,
+				container_id,
+				status,
+				name,
+				description,
+				instructions,
+				address,
+				client_id,
+				client_secret,
+				settings,
+				created_at,
+				updated_at
+			FROM agents
+			WHERE client_id = $1
+		`,
+		clientId,
+	).Scan(
+		&v.ID,
+		&v.ParentID,
+		&v.ContainerID,
+		&v.Status,
+		&v.Name,
+		&v.Description,
+		&v.Instructions,
+		&v.Address,
+		&v.ClientID,
+		&v.ClientSecret,
+		&v.Settings,
+		&v.CreatedAt,
+		&v.UpdatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return v, false
+		}
+
+		panic(err)
+	}
+
+	if v.ClientSecret != models.Secret(clientSecret) {
+		return v, false
+	}
+
+	return v, true
+}
+
 func (self AgentsRepository) Create(value models.Agent) models.Agent {
 	now := time.Now()
 	value.CreatedAt = now
@@ -204,6 +265,7 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 				parent_id,
 				container_id,
 				status,
+				name,
 				description,
 				instructions,
 				address,
@@ -224,13 +286,15 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 				$9,
 				$10,
 				$11,
-				$12
+				$12,
+				$13
 			)
 		`,
 		value.ID,
 		value.ParentID,
 		value.ContainerID,
 		value.Status,
+		value.Name,
 		value.Description,
 		value.Instructions,
 		value.Address,
@@ -242,6 +306,10 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 	)
 
 	if err != nil {
+		panic(err)
+	}
+
+	if err = self.partition(value); err != nil {
 		panic(err)
 	}
 
@@ -292,4 +360,29 @@ func (self AgentsRepository) Delete(id string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (self AgentsRepository) partition(agent models.Agent) error {
+	_, err := self.pg.Exec(
+		fmt.Sprintf(
+			`
+				CREATE TABLE IF NOT EXISTS agent_logs_%s
+				PARTITION OF agent_logs FOR VALUES IN ('%s')
+				PARTITION BY RANGE (created_at);
+
+				SELECT partman.create_parent(
+					p_parent_table => 'public.agent_logs_%s',
+					p_control => 'created_at',
+					p_type => 'range',
+					p_interval => '1 month',
+					p_premake => 4
+				);
+			`,
+			agent.Name,
+			agent.ID,
+			agent.Name,
+		),
+	)
+
+	return err
 }

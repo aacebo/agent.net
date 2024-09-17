@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS agents (
 	parent_id		UUID			REFERENCES agents(id) ON DELETE CASCADE,
 	container_id	TEXT,
 	status			TEXT			NOT NULL,
+	name			TEXT			NOT NULL UNIQUE,
 	description		TEXT			NOT NULL,
 	instructions	TEXT,
 	address			TEXT,
