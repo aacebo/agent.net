@@ -8,26 +8,29 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/models"
 )
 
 type LoggerClient struct {
-	id      string
-	baseUrl string
-	client  *http.Client
-	log     *slog.Logger
+	clientId     string
+	clientSecret string
+	baseUrl      string
+	client       *http.Client
+	log          *slog.Logger
 }
 
-func NewLogger(id string, name string, baseUrl string) *LoggerClient {
+func NewLogger(name string, baseUrl string) *LoggerClient {
 	client := http.Client{}
 
 	return &LoggerClient{
-		id:      id,
-		baseUrl: baseUrl,
-		client:  &client,
-		log:     logger.New(name),
+		clientId:     os.Getenv("AGENT_CLIENT_ID"),
+		clientSecret: os.Getenv("AGENT_CLIENT_SECRET"),
+		baseUrl:      baseUrl,
+		client:       &client,
+		log:          logger.New(name),
 	}
 }
 
@@ -75,15 +78,19 @@ func (self LoggerClient) Log(level models.LogLevel, text string, data map[string
 	}
 
 	buf := bytes.NewBuffer(b)
-	res, err := self.client.Post(
-		fmt.Sprintf(
-			"%s/v1/agents/%s/logs",
-			self.baseUrl,
-			self.id,
-		),
-		"application/json",
+	req, err := http.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("%s/v1/agents/logs", self.baseUrl),
 		buf,
 	)
+
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("client_id", self.clientId)
+	req.Header.Add("client_secret", self.clientSecret)
+	res, err := self.client.Do(req)
 
 	if err != nil {
 		return err

@@ -37,7 +37,7 @@ func New(
 		},
 		client:  ws.NewClient(),
 		sockets: sockets,
-		log:     NewLogger(id, "agent.net/agent", fmt.Sprintf("https://%s", address)),
+		log:     NewLogger("agent.net/agent", fmt.Sprintf("https://%s", address)),
 		mu:      sync.RWMutex{},
 	}
 }

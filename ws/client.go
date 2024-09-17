@@ -1,27 +1,32 @@
 package ws
 
 import (
-	"fmt"
+	"log/slog"
 	"net/http"
 	"sync"
 
+	"github.com/aacebo/agent.net/core/logger"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
-	conn *websocket.Conn
-	mu   sync.RWMutex
+	conn  *websocket.Conn
+	log   *slog.Logger
+	read  sync.Mutex
+	write sync.Mutex
 }
 
 func NewClient() *Client {
 	return &Client{
-		mu: sync.RWMutex{},
+		log:   logger.New("agent.net/agent/socket"),
+		read:  sync.Mutex{},
+		write: sync.Mutex{},
 	}
 }
 
 func (self *Client) Connect(url string, headers http.Header) error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
+	self.write.Lock()
+	defer self.write.Unlock()
 
 	conn, _, err := websocket.DefaultDialer.Dial(url, headers)
 
@@ -38,8 +43,8 @@ func (self *Client) Close() error {
 }
 
 func (self *Client) Read() (Message, error) {
-	self.mu.RLock()
-	defer self.mu.RUnlock()
+	self.read.Lock()
+	defer self.read.Unlock()
 
 	msg := Message{}
 	err := self.conn.ReadJSON(&msg)
@@ -48,13 +53,13 @@ func (self *Client) Read() (Message, error) {
 		return msg, err
 	}
 
-	fmt.Println(msg)
+	self.log.Debug(msg.String())
 	return msg, err
 }
 
 func (self *Client) Send(msg Message) error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
+	self.write.Lock()
+	defer self.write.Unlock()
 
 	err := self.conn.WriteJSON(msg)
 
@@ -63,5 +68,6 @@ func (self *Client) Send(msg Message) error {
 		return err
 	}
 
+	self.log.Debug(msg.String())
 	return err
 }

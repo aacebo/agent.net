@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/models"
@@ -29,6 +30,14 @@ func Socket(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		clientId := r.Header.Get("client_id")
 		clientSecret := r.Header.Get("client_secret")
+
+		agent, exists := agents.GetByCredentials(clientId, clientSecret)
+
+		if !exists {
+			render.Status(r, http.StatusUnauthorized)
+			render.JSON(w, r, "unauthorized")
+		}
+
 		conn, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
@@ -52,7 +61,13 @@ func Socket(ctx context.Context) http.HandlerFunc {
 			agent = agents.Update(agent)
 		}()
 
-		socket.Send(ws.NewQueryMessage("stat"))
+		go func() {
+			for range time.Tick(5 * time.Second) {
+				if err := socket.Send(ws.NewQueryMessage("stat")); err != nil {
+					return
+				}
+			}
+		}()
 
 		for {
 			message, err := socket.Read()
@@ -67,18 +82,18 @@ func Socket(ctx context.Context) http.HandlerFunc {
 
 				switch body.Name {
 				case "stat":
-					onStatResponse(body.Body, socket)
+					onStatResponse(agent, body.Body, socket)
 				}
 			}
 		}
 	}
 }
 
-func onStatResponse(ctx context.Context) func(any, *ws.Socket) {
+func onStatResponse(ctx context.Context) func(models.Agent, any, *ws.Socket) {
 	log := logger.New("agent.net/api/sockets")
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
-	return func(data any, socket *ws.Socket) {
+	return func(agent models.Agent, data any, socket *ws.Socket) {
 		b, err := json.Marshal(data)
 
 		if err != nil {
@@ -93,15 +108,7 @@ func onStatResponse(ctx context.Context) func(any, *ws.Socket) {
 			return
 		}
 
-		log.Debug(stat.String())
-
 		ipAddress := socket.IPAddress()
-		agent, exists := agents.GetByID(stat.ID)
-
-		if !exists {
-			return
-		}
-
 		agent.Status = models.AGENT_STATUS_UP
 		agent.Address = &ipAddress
 		agent = agents.Update(agent)

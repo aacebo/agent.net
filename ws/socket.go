@@ -15,9 +15,10 @@ type Socket struct {
 	ID        string
 	CreatedAt time.Time
 
-	conn *websocket.Conn
-	log  *slog.Logger
-	mu   sync.RWMutex
+	conn  *websocket.Conn
+	log   *slog.Logger
+	read  sync.Mutex
+	write sync.Mutex
 }
 
 func newSocket(conn *websocket.Conn) *Socket {
@@ -26,9 +27,10 @@ func newSocket(conn *websocket.Conn) *Socket {
 		ID:        id,
 		CreatedAt: time.Now(),
 
-		conn: conn,
-		log:  logger.New(fmt.Sprintf("agent.net/socket/%s", id)),
-		mu:   sync.RWMutex{},
+		conn:  conn,
+		log:   logger.New(fmt.Sprintf("agent.net/socket/%s", id)),
+		read:  sync.Mutex{},
+		write: sync.Mutex{},
 	}
 
 	go socket.ping()
@@ -40,8 +42,8 @@ func (self *Socket) IPAddress() string {
 }
 
 func (self *Socket) Read() (Message, error) {
-	self.mu.RLock()
-	defer self.mu.RUnlock()
+	self.read.Lock()
+	defer self.read.Unlock()
 
 	msg := Message{}
 	err := self.conn.ReadJSON(&msg)
@@ -56,27 +58,34 @@ func (self *Socket) Read() (Message, error) {
 }
 
 func (self *Socket) Send(msg Message) error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
+	self.write.Lock()
+	defer self.write.Unlock()
 
 	err := self.conn.WriteJSON(msg)
 
 	if err != nil {
 		self.log.Warn(err.Error())
 		self.conn.Close()
+		return err
 	}
 
+	self.log.Debug(msg.String())
 	return err
 }
 
 func (self *Socket) ping() {
 	for range time.Tick(20 * time.Second) {
+		self.write.Lock()
+
 		err := self.conn.WriteMessage(websocket.PingMessage, []byte{})
 
 		if err != nil {
 			self.log.Warn(err.Error())
 			self.conn.Close()
+			self.write.Unlock()
 			return
 		}
+
+		self.write.Unlock()
 	}
 }

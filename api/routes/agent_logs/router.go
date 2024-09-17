@@ -16,10 +16,10 @@ func New(r chi.Router, ctx context.Context) {
 	)
 
 	r.With(
-		middleware.WithAgent(ctx),
+		middleware.WithAgentCreds(ctx),
 		middleware.WithBody[CreateBody](ctx, "/agent_logs/create"),
 	).Post(
-		"/agents/{agent_id}/logs",
+		"/agents/logs",
 		Create(ctx),
 	)
 }
