@@ -4,21 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/aacebo/agent.net/amqp"
+	"github.com/aacebo/agent.net/containers"
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/models"
 	"github.com/aacebo/agent.net/core/repos"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
-	"github.com/docker/go-connections/nat"
 	"github.com/rabbitmq/amqp091-go"
 )
 
 func Start(ctx context.Context) func(amqp091.Delivery) {
 	log := logger.New("agent.net/worker/agents/start")
-	docker := ctx.Value("docker").(*client.Client)
+	client := ctx.Value("containers").(containers.Client)
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 	port := 8080
 
@@ -83,19 +80,13 @@ func Start(ctx context.Context) func(amqp091.Delivery) {
 		}
 
 		if agent.ContainerID == nil {
-			res, err := docker.ContainerCreate(context.Background(), &container.Config{
-				Image:        "agent.net/agent",
-				ExposedPorts: nat.PortSet{"80/tcp": {}},
-				Env:          env,
-				Tty:          true,
-			}, &container.HostConfig{
-				PortBindings: nat.PortMap{
-					nat.Port("80/tcp"): []nat.PortBinding{{
-						HostIP:   "0.0.0.0",
-						HostPort: strconv.Itoa(port),
-					}},
-				},
-			}, nil, nil, fmt.Sprintf("agent.net-agent-%s", agent.ID))
+			id, err := client.Create(containers.ContainerCreateArgs{
+				Image:     "agent.net/agent",
+				Name:      fmt.Sprintf("agent.net-agent-%s", agent.ID),
+				Port:      port,
+				IPAddress: "0.0.0.0",
+				Env:       env,
+			})
 
 			if err != nil {
 				log.Error(err.Error())
@@ -103,11 +94,11 @@ func Start(ctx context.Context) func(amqp091.Delivery) {
 				return
 			}
 
-			agent.ContainerID = &res.ID
+			agent.ContainerID = &id
 			agent = agents.Update(agent)
 		}
 
-		if err := docker.ContainerStart(context.Background(), *agent.ContainerID, container.StartOptions{}); err != nil {
+		if err := client.Start(*agent.ContainerID); err != nil {
 			log.Error(err.Error())
 			m.Nack(false, true)
 			return

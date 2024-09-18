@@ -5,16 +5,15 @@ import (
 	"fmt"
 
 	"github.com/aacebo/agent.net/amqp"
+	"github.com/aacebo/agent.net/containers"
 	"github.com/aacebo/agent.net/core/logger"
 	"github.com/aacebo/agent.net/core/models"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 	"github.com/rabbitmq/amqp091-go"
 )
 
 func Stop(ctx context.Context) func(amqp091.Delivery) {
 	log := logger.New("agent.net/worker/agents/stop")
-	docker := ctx.Value("docker").(*client.Client)
+	client := ctx.Value("containers").(containers.Client)
 
 	return func(m amqp091.Delivery) {
 		event := amqp.Event{}
@@ -39,13 +38,7 @@ func Stop(ctx context.Context) func(amqp091.Delivery) {
 			return
 		}
 
-		err := docker.ContainerStop(
-			context.Background(),
-			*agent.ContainerID,
-			container.StopOptions{},
-		)
-
-		if err != nil {
+		if err := client.Stop(*agent.ContainerID); err != nil {
 			log.Error(err.Error())
 			m.Nack(false, true)
 			return

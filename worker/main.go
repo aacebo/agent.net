@@ -6,12 +6,12 @@ import (
 	"sync"
 
 	"github.com/aacebo/agent.net/amqp"
+	"github.com/aacebo/agent.net/containers"
 	"github.com/aacebo/agent.net/core"
 	"github.com/aacebo/agent.net/core/models"
 	"github.com/aacebo/agent.net/core/repos"
 	"github.com/aacebo/agent.net/postgres"
 	"github.com/aacebo/agent.net/worker/routes"
-	"github.com/docker/docker/client"
 )
 
 func main() {
@@ -27,10 +27,7 @@ func main() {
 	amqp := amqp.New()
 	defer amqp.Close()
 
-	docker, err := client.NewClientWithOpts(
-		client.FromEnv,
-		client.WithAPIVersionNegotiation(),
-	)
+	containerClient, err := containers.NewDockerClient()
 
 	if err != nil {
 		panic(err)
@@ -39,7 +36,7 @@ func main() {
 	ctx := core.Context{
 		"amqp":         amqp,
 		"pg":           pg,
-		"docker":       docker,
+		"containers":   containerClient,
 		"repos.agents": repos.Agents(pg),
 	}
 

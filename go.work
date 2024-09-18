@@ -3,6 +3,7 @@ go 1.23.1
 use ./amqp
 use ./api
 use ./core
+use ./containers
 use ./postgres
 use ./worker
 use ./agent
