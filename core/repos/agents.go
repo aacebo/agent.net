@@ -52,7 +52,6 @@ func (self AgentsRepository) Get() []models.Agent {
 				created_at,
 				updated_at
 			FROM agents
-			WHERE parent_id IS NULL
 			ORDER BY updated_at DESC
 		`,
 	)
@@ -113,6 +112,7 @@ func (self AgentsRepository) GetEdges(parentId string) []models.Agent {
 				updated_at
 			FROM agents
 			WHERE parent_id = $1
+			ORDER BY updated_at DESC
 		`,
 		parentId,
 	)

@@ -1,0 +1,5 @@
+<cytoscape
+  [nodes]="(state.me$.nodes$ | async) || []"
+  [edges]="(state.me$.edges$ | async) || []"
+  (nodesSelect)="onSelect($event)"
+></cytoscape>
