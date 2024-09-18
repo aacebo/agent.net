@@ -23,7 +23,6 @@ func (self *Agent) Listen() {
 	}
 
 	defer self.parent.Close()
-	self.log.Info("connected...", nil)
 
 	for {
 		message, err := self.parent.Read()

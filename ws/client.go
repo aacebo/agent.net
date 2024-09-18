@@ -17,6 +17,7 @@ type Client struct {
 	conn              *websocket.Conn
 	log               *slog.Logger
 	reconnectAttempts int
+	onConnect         func()
 	read              sync.Mutex
 	write             sync.Mutex
 }
@@ -29,6 +30,10 @@ func NewClient() *Client {
 	}
 }
 
+func (self *Client) OnConnect(handler func()) {
+	self.onConnect = handler
+}
+
 func (self *Client) Connect(url string, headers http.Header) error {
 	self.write.Lock()
 	defer self.write.Unlock()
@@ -37,6 +42,10 @@ func (self *Client) Connect(url string, headers http.Header) error {
 
 	if err != nil {
 		return err
+	}
+
+	if self.onConnect != nil {
+		go self.onConnect()
 	}
 
 	self.url = url
@@ -52,10 +61,9 @@ func (self *Client) Close() error {
 
 func (self *Client) Read() (Message, error) {
 	self.read.Lock()
-	defer self.read.Unlock()
-
 	msg := Message{}
 	err := self.conn.ReadJSON(&msg)
+	self.read.Unlock()
 
 	if err != nil {
 		self.reconnect()
@@ -67,9 +75,8 @@ func (self *Client) Read() (Message, error) {
 
 func (self *Client) Send(msg Message) error {
 	self.write.Lock()
-	defer self.write.Unlock()
-
 	err := self.conn.WriteJSON(msg)
+	self.write.Unlock()
 
 	if err != nil {
 		self.reconnect()

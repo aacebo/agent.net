@@ -42,7 +42,8 @@ func NewAgent(
 	clientSecret string,
 	startedAt time.Time,
 ) *Agent {
-	return &Agent{
+	parent := ws.NewClient()
+	agent := &Agent{
 		ID:            id,
 		Address:       address,
 		ParentAddress: parentAddress,
@@ -53,10 +54,13 @@ func NewAgent(
 		Edges:         []models.AgentStat{},
 
 		log:      client.NewLogger(fmt.Sprintf("agent.net/%s/runtime", name)),
-		parent:   ws.NewClient(),
+		parent:   parent,
 		children: ws.NewSockets(),
 		mu:       sync.RWMutex{},
 	}
+
+	parent.OnConnect(agent.onConnect)
+	return agent
 }
 
 func (self *Agent) Logger() *client.LoggerClient {
@@ -153,4 +157,12 @@ func (self *Agent) SendToAgents(msg ws.Message) error {
 	}
 
 	return nil
+}
+
+func (self *Agent) onConnect() {
+	self.log.Info("connected...", nil)
+	self.SendToParent(ws.NewConnectedMessage(ws.ConnectedMessageBody{
+		"id":      self.ID,
+		"address": self.Address,
+	}))
 }
