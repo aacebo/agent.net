@@ -1,0 +1,5 @@
+PATCH {{base_url}}/v1/agents/1
+
+{
+	"description": "I was updated!"
+}

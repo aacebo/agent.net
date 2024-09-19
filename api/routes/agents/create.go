@@ -18,6 +18,7 @@ type CreateBody struct {
 	Description  string               `json:"description"`
 	Instructions *string              `json:"instructions,omitempty"`
 	Settings     models.AgentSettings `json:"settings"`
+	Position     *models.Position     `json:"position,omitempty"`
 }
 
 func Create(ctx context.Context) http.HandlerFunc {
@@ -48,6 +49,11 @@ func Create(ctx context.Context) http.HandlerFunc {
 		agent.Description = body.Description
 		agent.Instructions = body.Instructions
 		agent.Settings = body.Settings
+
+		if body.Position != nil {
+			agent.Position = *body.Position
+		}
+
 		agent = agents.Create(agent)
 		amqp.Publish("agents", "create", agent)
 

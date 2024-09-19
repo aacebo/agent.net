@@ -63,6 +63,10 @@ export class CytoscapeComponent implements OnInit, OnDestroy {
       }
     });
 
+    setTimeout(() => {
+      this._graph?.layout(LAYOUT).run();
+    }, 500);
+
     this._graph.on('zoom', () => {
       this._runZoom();
     });
@@ -107,7 +111,6 @@ export class CytoscapeComponent implements OnInit, OnDestroy {
         nodes: this._nodes,
         edges: this._edges,
       }
-    }).layout(LAYOUT).run();
-    this.center();
+    });
   }
 }

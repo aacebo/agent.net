@@ -2,12 +2,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string",
-      "description": "the agents unique name",
-      "minLength": 1,
-      "maxLength": 20
-    },
     "description": {
       "type": "string",
       "description": "the agents description",
@@ -64,6 +58,5 @@
       },
       "required": ["x", "y"]
     }
-  },
-  "required": ["description", "settings"]
+  }
 }

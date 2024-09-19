@@ -14,6 +14,10 @@ export interface Agent {
     logit_bias?: Record<string, any>;
     logprobs?: boolean;
   };
+  position: {
+    x: number;
+    y: number;
+  };
   readonly created_at: Date | string;
   readonly updated_at: Date | string;
 }

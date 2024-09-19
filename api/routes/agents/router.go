@@ -34,6 +34,14 @@ func New(r chi.Router, ctx context.Context) {
 
 	r.With(
 		middleware.WithAgent(ctx),
+		middleware.WithBody[UpdateBody](ctx, "/agents/update"),
+	).Patch(
+		"/agents/{agent_id}",
+		Update(ctx),
+	)
+
+	r.With(
+		middleware.WithAgent(ctx),
 	).Post(
 		"/agents/{agent_id}/start",
 		Start(ctx),

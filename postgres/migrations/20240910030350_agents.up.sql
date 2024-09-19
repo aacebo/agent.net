@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS agents (
 	client_id		TEXT			NOT NULL,
 	client_secret	TEXT			NOT NULL,
 	settings		JSONB			NOT NULL,
+	position		JSONB			NOT NULL,
     created_at  	TIMESTAMPTZ    	NOT NULL,
     updated_at  	TIMESTAMPTZ    	NOT NULL
 );

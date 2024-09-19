@@ -15,7 +15,7 @@ type IAgentsRepository interface {
 	GetEdges(parentId string) []models.Agent
 	GetByID(id string) (models.Agent, bool)
 	GetByName(name string) (models.Agent, bool)
-	GetByCredentials(clientId string, clientSecret string) (models.Agent, bool)
+	GetByCreds(clientId string, clientSecret string) (models.Agent, bool)
 
 	Create(value models.Agent) models.Agent
 	Update(value models.Agent) models.Agent
@@ -49,6 +49,7 @@ func (self AgentsRepository) Get() []models.Agent {
 				client_id,
 				client_secret,
 				settings,
+				position,
 				created_at,
 				updated_at
 			FROM agents
@@ -78,6 +79,7 @@ func (self AgentsRepository) Get() []models.Agent {
 			&v.ClientID,
 			&v.ClientSecret,
 			&v.Settings,
+			&v.Position,
 			&v.CreatedAt,
 			&v.UpdatedAt,
 		)
@@ -108,6 +110,7 @@ func (self AgentsRepository) GetEdges(parentId string) []models.Agent {
 				client_id,
 				client_secret,
 				settings,
+				position,
 				created_at,
 				updated_at
 			FROM agents
@@ -139,6 +142,7 @@ func (self AgentsRepository) GetEdges(parentId string) []models.Agent {
 			&v.ClientID,
 			&v.ClientSecret,
 			&v.Settings,
+			&v.Position,
 			&v.CreatedAt,
 			&v.UpdatedAt,
 		)
@@ -170,6 +174,7 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 				client_id,
 				client_secret,
 				settings,
+				position,
 				created_at,
 				updated_at
 			FROM agents
@@ -188,6 +193,7 @@ func (self AgentsRepository) GetByID(id string) (models.Agent, bool) {
 		&v.ClientID,
 		&v.ClientSecret,
 		&v.Settings,
+		&v.Position,
 		&v.CreatedAt,
 		&v.UpdatedAt,
 	)
@@ -219,6 +225,7 @@ func (self AgentsRepository) GetByName(name string) (models.Agent, bool) {
 				client_id,
 				client_secret,
 				settings,
+				position,
 				created_at,
 				updated_at
 			FROM agents
@@ -237,6 +244,7 @@ func (self AgentsRepository) GetByName(name string) (models.Agent, bool) {
 		&v.ClientID,
 		&v.ClientSecret,
 		&v.Settings,
+		&v.Position,
 		&v.CreatedAt,
 		&v.UpdatedAt,
 	)
@@ -252,7 +260,7 @@ func (self AgentsRepository) GetByName(name string) (models.Agent, bool) {
 	return v, true
 }
 
-func (self AgentsRepository) GetByCredentials(clientId string, clientSecret string) (models.Agent, bool) {
+func (self AgentsRepository) GetByCreds(clientId string, clientSecret string) (models.Agent, bool) {
 	v := models.Agent{}
 	err := self.pg.QueryRow(
 		`
@@ -268,6 +276,7 @@ func (self AgentsRepository) GetByCredentials(clientId string, clientSecret stri
 				client_id,
 				client_secret,
 				settings,
+				position,
 				created_at,
 				updated_at
 			FROM agents
@@ -286,6 +295,7 @@ func (self AgentsRepository) GetByCredentials(clientId string, clientSecret stri
 		&v.ClientID,
 		&v.ClientSecret,
 		&v.Settings,
+		&v.Position,
 		&v.CreatedAt,
 		&v.UpdatedAt,
 	)
@@ -323,6 +333,7 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 				client_id,
 				client_secret,
 				settings,
+				position,
 				created_at,
 				updated_at
 			) VALUES (
@@ -338,7 +349,8 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 				$10,
 				$11,
 				$12,
-				$13
+				$13,
+				$14
 			)
 		`,
 		value.ID,
@@ -352,6 +364,7 @@ func (self AgentsRepository) Create(value models.Agent) models.Agent {
 		value.ClientID,
 		value.ClientSecret,
 		value.Settings,
+		value.Position,
 		value.CreatedAt,
 		value.UpdatedAt,
 	)
@@ -379,7 +392,8 @@ func (self AgentsRepository) Update(value models.Agent) models.Agent {
 				instructions = $5,
 				address = $6,
 				settings = $7,
-				updated_at = $8
+				position = $8,
+				updated_at = $9
 			WHERE id = $1
 		`,
 		value.ID,
@@ -389,6 +403,7 @@ func (self AgentsRepository) Update(value models.Agent) models.Agent {
 		value.Instructions,
 		value.Address,
 		value.Settings,
+		value.Position,
 		value.UpdatedAt,
 	)
 

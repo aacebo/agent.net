@@ -4,7 +4,6 @@ export const LAYOUT: fcose.FcoseLayoutOptions = {
   name: 'fcose',
   quality: 'default',
 
-  randomize: true,
   // Whether or not to animate the layout
   animate: false,
   // Duration of animation in ms, if enabled

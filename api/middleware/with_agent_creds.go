@@ -16,7 +16,7 @@ func WithAgentCreds(ctx context.Context) func(http.Handler) http.Handler {
 			ctx := r.Context()
 			clientId := r.Header.Get("X_CLIENT_ID")
 			clientSecret := r.Header.Get("X_CLIENT_SECRET")
-			agent, exists := agents.GetByCredentials(clientId, clientSecret)
+			agent, exists := agents.GetByCreds(clientId, clientSecret)
 
 			if !exists {
 				render.Status(r, http.StatusUnauthorized)

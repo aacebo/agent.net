@@ -20,6 +20,7 @@ type Agent struct {
 	ClientID     string        `json:"-"`
 	ClientSecret Secret        `json:"-"`
 	Settings     AgentSettings `json:"settings"`
+	Position     Position      `json:"position,omitempty"`
 	CreatedAt    time.Time     `json:"created_at"`
 	UpdatedAt    time.Time     `json:"updated_at"`
 }
@@ -31,6 +32,7 @@ func NewAgent() Agent {
 		ClientID:     utils.RandString(20),
 		ClientSecret: Secret(utils.RandString(32)),
 		Settings:     AgentSettings{},
+		Position:     Position{},
 	}
 }
 
