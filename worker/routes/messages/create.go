@@ -11,7 +11,7 @@ import (
 )
 
 func Create(ctx context.Context) func(amqp091.Delivery) {
-	log := logger.New("agent.net/worker/messages/create")
+	log := logger.New("worker/messages/create")
 
 	return func(m amqp091.Delivery) {
 		event := amqp.Event{}

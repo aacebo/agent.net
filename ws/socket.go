@@ -28,7 +28,7 @@ func newSocket(conn *websocket.Conn) *Socket {
 		CreatedAt: time.Now(),
 
 		conn:  conn,
-		log:   logger.New(fmt.Sprintf("agent.net/socket/%s", id)),
+		log:   logger.New(fmt.Sprintf("socket/%s", id)),
 		read:  sync.Mutex{},
 		write: sync.Mutex{},
 	}

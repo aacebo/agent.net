@@ -19,14 +19,14 @@ export class MeState extends StateProperty<_MeState> {
       map(agents => agents.map(a => ({
         group: 'nodes',
         selectable: true,
-        position: a.position,
+        position: { ...a.position },
         data: {
           id: a.id,
           parent: a.parent_id,
           name: a.name,
           description: a.description,
           content: a.name,
-          position: a.position,
+          position: { ...a.position },
           status: a.status,
           address: a.address,
           weight: 50,

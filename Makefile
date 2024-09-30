@@ -8,10 +8,10 @@ test:
 run: api.run worker.run
 
 api.run:
-	cd api ; make run
+	cd api ; LOG_PREFIX=agent.net/api make run
 
 worker.run:
-	cd worker ; make run
+	cd worker ; LOG_PREFIX=agent.net/worker make run
 
 migrate.up:
 	migrate -source file://postgres/migrations -database "$(POSTGRES_CONNECTION_STRING)" up

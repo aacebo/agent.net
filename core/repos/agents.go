@@ -30,7 +30,7 @@ type AgentsRepository struct {
 func Agents(pg *sql.DB) AgentsRepository {
 	return AgentsRepository{
 		pg:  pg,
-		log: logger.New("agent.net/repos/agents"),
+		log: logger.New("repos/agents"),
 	}
 }
 

@@ -58,7 +58,7 @@ func main() {
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(logger.Request(logger.New("agent.net/http")))
+	r.Use(logger.Request(logger.New("http")))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.NoCache)
 	r.Use(middleware.Timeout(60 * time.Second))

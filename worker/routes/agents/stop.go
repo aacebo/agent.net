@@ -12,7 +12,7 @@ import (
 )
 
 func Stop(ctx context.Context) func(amqp091.Delivery) {
-	log := logger.New("agent.net/worker/agents/stop")
+	log := logger.New("worker/agents/stop")
 	client := ctx.Value("containers").(containers.Client)
 
 	return func(m amqp091.Delivery) {

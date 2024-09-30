@@ -13,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var log = logger.New("agent.net/postgres")
+var log = logger.New("postgres")
 var conn *sql.DB
 
 func New() *sql.DB {

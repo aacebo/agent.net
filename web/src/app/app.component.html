@@ -2,4 +2,15 @@
   [nodes]="(state.me$.nodes$ | async) || []"
   [edges]="(state.me$.edges$ | async) || []"
   (nodesSelect)="onSelect($event)"
+  (positionChange)="onPositionChange($event)"
 ></cytoscape>
+
+<button
+  class="fixed right-5 bottom-5 flex justify-center h-12 w-12 shadow-md bg-blue-500 rounded-full hover:bg-blue-700 disabled:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+>
+  <app-icon
+    class="m-auto"
+    name="plus"
+    strokeWidth="2"
+  ></app-icon>
+</button>

@@ -24,7 +24,7 @@ type Client struct {
 
 func NewClient() *Client {
 	return &Client{
-		log:   logger.New("agent.net/agent/socket"),
+		log:   logger.New("agent/socket"),
 		read:  sync.Mutex{},
 		write: sync.Mutex{},
 	}

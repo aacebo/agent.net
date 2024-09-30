@@ -14,7 +14,7 @@ import (
 )
 
 func Start(ctx context.Context) func(amqp091.Delivery) {
-	log := logger.New("agent.net/worker/agents/start")
+	log := logger.New("worker/agents/start")
 	client := ctx.Value("containers").(containers.Client)
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 	port := 8080
@@ -61,6 +61,7 @@ func Start(ctx context.Context) func(amqp091.Delivery) {
 		}
 
 		env := []string{
+			"LOG_PREFIX=agent.net/node",
 			fmt.Sprintf("AGENT_ID=%s", agent.ID),
 			fmt.Sprintf("AGENT_CLIENT_ID=%s", agent.ClientID),
 			fmt.Sprintf("AGENT_CLIENT_SECRET=%s", agent.ClientSecret),

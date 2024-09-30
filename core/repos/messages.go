@@ -25,7 +25,7 @@ type MessagesRepository struct {
 func Messages(pg *sql.DB) MessagesRepository {
 	return MessagesRepository{
 		pg:  pg,
-		log: logger.New("agent.net/repos/messages"),
+		log: logger.New("repos/messages"),
 	}
 }
 

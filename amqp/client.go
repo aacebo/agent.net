@@ -26,7 +26,7 @@ func New() *Client {
 	self := &Client{
 		conn:   nil,
 		ch:     nil,
-		log:    logger.New("agent.net/amqp"),
+		log:    logger.New("amqp"),
 		queues: map[string]amqp091.Queue{},
 	}
 

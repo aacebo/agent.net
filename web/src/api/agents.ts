@@ -7,7 +7,27 @@ interface CreateParams {
   readonly name: string;
   readonly description?: string;
   readonly instructions?: string;
+  readonly position?: {
+    readonly x: number;
+    readonly y: number;
+  };
   readonly settings: {
+    readonly api_key: string;
+    readonly model: string;
+    readonly frequency_penalty?: number;
+    readonly logit_bias?: Record<string, any>;
+    readonly logprobs?: boolean;
+  };
+}
+
+interface UpdateParams {
+  readonly description?: string;
+  readonly instructions?: string;
+  readonly position?: {
+    readonly x: number;
+    readonly y: number;
+  };
+  readonly settings?: {
     readonly api_key: string;
     readonly model: string;
     readonly frequency_penalty?: number;
@@ -39,6 +59,14 @@ export class Agents {
     }
 
     return firstValueFrom(this._http.post<Agent>(url, body));
+  }
+
+  update(id: string, params: UpdateParams) {
+    return firstValueFrom(this._http.patch<Agent>(`/agents/${id}`, params));
+  }
+
+  delete(id: string) {
+    return firstValueFrom(this._http.delete<void>(`/agents/${id}`));
   }
 
   start(id: string) {

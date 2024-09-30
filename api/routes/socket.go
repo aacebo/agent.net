@@ -16,7 +16,7 @@ import (
 )
 
 func Socket(ctx context.Context) http.HandlerFunc {
-	log := logger.New("agent.net/api/sockets")
+	log := logger.New("api/sockets")
 	onConnected := onConnected(ctx)
 	onDisconnected := onDisconnected(ctx)
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
@@ -83,7 +83,7 @@ func Socket(ctx context.Context) http.HandlerFunc {
 }
 
 func onConnected(ctx context.Context) func(*ws.Socket, ws.Message) error {
-	log := logger.New("agent.net/api/sockets")
+	log := logger.New("api/sockets")
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
 	return func(socket *ws.Socket, msg ws.Message) error {
@@ -105,7 +105,7 @@ func onConnected(ctx context.Context) func(*ws.Socket, ws.Message) error {
 }
 
 func onDisconnected(ctx context.Context) func(*ws.Socket, ws.Message) error {
-	log := logger.New("agent.net/api/sockets")
+	log := logger.New("api/sockets")
 	agents := ctx.Value("repos.agents").(repos.IAgentsRepository)
 
 	return func(socket *ws.Socket, msg ws.Message) error {

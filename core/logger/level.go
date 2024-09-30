@@ -2,9 +2,6 @@ package logger
 
 import (
 	"log/slog"
-	"strings"
-
-	"github.com/aacebo/agent.net/core/utils"
 )
 
 type Level string
@@ -15,11 +12,6 @@ const (
 	Warn  Level = "warn"
 	Error Level = "error"
 )
-
-func GetEnvLevel() (Level, bool) {
-	level := Level(strings.ToLower(utils.GetEnv("LOG_LEVEL", string(Debug))))
-	return level, level.Valid()
-}
 
 func (self Level) Valid() bool {
 	switch self {

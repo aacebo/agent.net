@@ -25,7 +25,7 @@ type ChatsRepository struct {
 func Chats(pg *sql.DB) ChatsRepository {
 	return ChatsRepository{
 		pg:  pg,
-		log: logger.New("agent.net/repos/chats"),
+		log: logger.New("repos/chats"),
 	}
 }
 

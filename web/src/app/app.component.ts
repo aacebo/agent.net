@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
-import { CytoscapeModule } from '../components/cytoscape';
 import { Api } from '../api';
 import { State } from '../state';
+import { CytoscapeModule, NodeData } from '../components/cytoscape';
+import { IconModule } from '../components/icon';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +13,8 @@ import { State } from '../state';
   imports: [
     CommonModule,
     RouterOutlet,
-    CytoscapeModule
+    CytoscapeModule,
+    IconModule,
   ],
   host: { class: 'app-root' },
   templateUrl: './app.component.html',
@@ -31,7 +33,21 @@ export class AppComponent {
     this.state.me$.set('agents', agents);
   }
 
-  onSelect(nodes: any[]) {
+  onSelect(nodes: NodeData[]) {
     console.log(nodes);
+  }
+
+  async onPositionChange(node: NodeData) {
+    const agent = await this._api.agents.update(node.id, {
+      position: node.position
+    });
+
+    const agents = this.state.me$.get('agents') || [];
+    const i = agents.findIndex(v => v.id === agent.id);
+
+    if (i === -1) return;
+
+    agents[i] = agent;
+    this.state.me$.set('agents', agents);
   }
 }

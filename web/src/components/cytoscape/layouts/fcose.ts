@@ -1,6 +1,6 @@
 import fcose from 'cytoscape-fcose';
 
-export const LAYOUT: fcose.FcoseLayoutOptions = {
+export const FCose: fcose.FcoseLayoutOptions = {
   name: 'fcose',
   quality: 'default',
 

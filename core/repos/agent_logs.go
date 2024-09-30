@@ -23,7 +23,7 @@ type AgentLogsRepository struct {
 func AgentLogs(pg *sql.DB) AgentLogsRepository {
 	return AgentLogsRepository{
 		pg:  pg,
-		log: logger.New("agent.net/repos/agent_logs"),
+		log: logger.New("repos/agent_logs"),
 	}
 }
 
