@@ -4,6 +4,10 @@
   min-height: 0px;
   height: 100%;
 
+  .drawer-container {
+    flex: 1;
+  }
+
   @media (prefers-color-scheme: dark) {
     color: theme('colors.white');
     background-color: theme('colors.slate.800');

@@ -13,6 +13,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([httpInterceptor])
     ),
-    provideAnimations()
+    provideAnimations(),
   ]
 };

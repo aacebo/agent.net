@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 
 import { Api } from '../api';
 import { State } from '../state';
 import { CytoscapeModule, NodeData } from '../components/cytoscape';
 import { IconModule } from '../components/icon';
+import { DrawerModule } from '../components/drawer';
+import { Agent } from '../models';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +18,7 @@ import { IconModule } from '../components/icon';
     RouterOutlet,
     CytoscapeModule,
     IconModule,
+    DrawerModule
   ],
   host: { class: 'app-root' },
   templateUrl: './app.component.html',
@@ -23,6 +27,8 @@ import { IconModule } from '../components/icon';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
+  readonly agent$ = new BehaviorSubject<Agent | undefined>(undefined);
+
   constructor(
     readonly state: State,
     private readonly _api: Api
@@ -34,7 +40,15 @@ export class AppComponent {
   }
 
   onSelect(nodes: NodeData[]) {
-    console.log(nodes);
+    if (nodes.length === 0) {
+      this.agent$.next(undefined);
+      return;
+    }
+
+    const node = nodes[0];
+    const agents = this.state.me$.get('agents') || [];
+    const agent = agents.find(a => a.id === node.id);
+    this.agent$.next(agent);
   }
 
   async onPositionChange(node: NodeData) {

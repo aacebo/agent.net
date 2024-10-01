@@ -1,0 +1,16 @@
+.drawer-container {
+  display: flex;
+
+  > .drawer {
+    width: 0px;
+    transform: translateX(-100%);
+    transition: all 0.2s ease-in-out;
+    transition-property: width, transform;
+
+    &.open {
+      width: 100%;
+      transform: translateX(0);
+    }
+  }
+}
+
